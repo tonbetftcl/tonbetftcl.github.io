@@ -26,20 +26,21 @@
         .auth-form h2{ text-align:center; margin-bottom:25px; font-size:2rem; color:var(--primary); }
         .input-group{ margin-bottom:20px; }
         .input-group label{ display:block; margin-bottom:6px; color:var(--text-secondary); font-size:0.9rem; }
-        .input-group input{ width:100%; padding:16px; background:rgba(10,10,20,0.7); border:1px solid rgba(255,255,255,0.1); border-radius:16px; color:#fff; font-size:1rem; outline:none; }
-        .input-group input:focus{ border-color:var(--primary); }
+        .input-group input, .input-group select{ width:100%; padding:16px; background:rgba(10,10,20,0.7); border:1px solid rgba(255,255,255,0.1); border-radius:16px; color:#fff; font-size:1rem; outline:none; }
+        .input-group input:focus, .input-group select:focus{ border-color:var(--primary); }
         .auth-btn{ width:100%; padding:16px; background:var(--primary); border:none; border-radius:18px; color:white; font-weight:700; font-size:1.1rem; cursor:pointer; margin-top:10px; }
         .toggle-link{ text-align:center; margin-top:15px; color:var(--text-secondary); font-size:0.9rem; }
         .toggle-link a{ color:var(--primary); text-decoration:none; cursor:pointer; }
         .error-msg{ color:var(--danger); text-align:center; margin-top:10px; font-size:0.9rem; }
-        .main-header{ display:flex; justify-content:center; align-items:center; margin-bottom:25px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:18px; }
+        .main-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:18px; }
         .logo-small{ font-size:2.2rem; font-weight:800; background:linear-gradient(to right, var(--primary) 38%, #ffffff 62%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-        .header-right{ position:absolute; right:0; top:50%; transform:translateY(-50%); }
-        .logout-btn{ background:rgba(255,255,255,0.05); border:1px solid rgba(233,69,96,0.5); color:#fff; padding:8px 16px; border-radius:12px; font-weight:600; font-size:0.9rem; cursor:pointer; }
-        .bottom-nav{ position:fixed; bottom:15px; left:50%; transform:translateX(-50%); width:calc(100% - 30px); max-width:450px; background:rgba(20,25,40,0.9); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-radius:30px; display:flex; justify-content:space-around; padding:10px 8px; box-shadow:0 10px 30px rgba(0,0,0,0.5); border:1px solid rgba(233,69,96,0.15); z-index:10; }
-        .nav-item{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#8888a0; font-size:0.55rem; font-weight:500; cursor:pointer; padding:6px 2px; border-radius:18px; gap:3px; text-align:center; }
+        .header-right{ display:flex; align-items:center; }
+        .logout-header-btn{ background:rgba(255,255,255,0.05); border:1px solid rgba(233,69,96,0.5); color:#fff; padding:8px 16px; border-radius:12px; font-weight:600; font-size:0.9rem; cursor:pointer; }
+        .logout-header-btn:hover{ background:var(--primary); }
+        .bottom-nav{ position:fixed; bottom:15px; left:50%; transform:translateX(-50%); width:calc(100% - 30px); max-width:450px; background:rgba(20,25,40,0.9); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-radius:30px; display:flex; justify-content:space-around; padding:8px 4px; box-shadow:0 10px 30px rgba(0,0,0,0.5); border:1px solid rgba(233,69,96,0.15); z-index:10; }
+        .nav-item{ flex:1 1 auto; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#8888a0; font-size:0.52rem; font-weight:500; cursor:pointer; padding:6px 2px; border-radius:18px; gap:2px; text-align:center; line-height:1.1; }
         .nav-item.active{ color:var(--primary); background:rgba(233,69,96,0.1); }
-        .nav-item svg{ width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:2; }
+        .nav-item svg{ width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2; }
         .tab-content{ flex:1; padding-bottom:20px; }
         .section-title{ font-size:1.3rem; font-weight:700; margin-bottom:18px; border-left:4px solid var(--primary); padding-left:15px; color:#f0f0ff; }
         .division-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:10px; margin-bottom:20px; }
@@ -134,9 +135,11 @@
 </div>
 
 <div id="adminBottomNav" class="bottom-nav hidden">
-    <div class="nav-item active" data-tab="adminManage">Управление</div>
+    <div class="nav-item active" data-tab="adminManage">Матчи</div>
     <div class="nav-item" data-tab="adminAdd">Добавить</div>
-    <div class="nav-item" data-tab="adminResults">Результаты</div>
+    <div class="nav-item" data-tab="adminUsers">Пользователи</div>
+    <div class="nav-item" data-tab="adminNotifications">Уведомления</div>
+    <div class="nav-item" data-tab="adminExport">Экспорт</div>
 </div>
 
 <script>
@@ -163,7 +166,6 @@
         ]);
         users = usersSnap.val() ? Object.values(usersSnap.val()) : [];
         matches = matchesSnap.val() ? Object.values(matchesSnap.val()) : [];
-        // гарантируем, что у каждого пользователя есть bets
         users.forEach(u => u.bets = u.bets || []);
         ensureAdmins();
     }
@@ -224,16 +226,47 @@
             currentTab = 'adminManage';
             document.querySelectorAll('#adminBottomNav .nav-item').forEach(i => i.classList.remove('active'));
             document.querySelector('#adminBottomNav .nav-item[data-tab="adminManage"]').classList.add('active');
-            const btn = document.createElement('button'); btn.className = 'logout-btn'; btn.textContent = 'Выйти';
-            btn.onclick = logout; els.headerRight.appendChild(btn);
         } else {
             els.bottomNav.classList.remove('hidden'); els.adminNav.classList.add('hidden');
             currentTab = 'matches';
             document.querySelectorAll('#bottomNav .nav-item').forEach(i => i.classList.remove('active'));
             document.querySelector('#bottomNav .nav-item[data-tab="matches"]').classList.add('active');
         }
+        const logoutBtn = document.createElement('button');
+        logoutBtn.className = 'logout-header-btn';
+        logoutBtn.textContent = 'Выйти';
+        logoutBtn.onclick = logout;
+        els.headerRight.appendChild(logoutBtn);
+
         renderTab(currentTab);
         checkPendingBets();
+        checkAdminNotification();
+    }
+
+    async function checkAdminNotification() {
+        const user = getCurrentUser();
+        if (!user || user.role === 'admin') return;
+        if (sessionStorage.getItem('notif_shown')) return;
+        const snap = await db.ref('notification').once('value');
+        const text = snap.val();
+        if (text) {
+            const overlay = document.createElement('div');
+            overlay.className = 'modal-overlay';
+            overlay.innerHTML = `<div class="modal-content">
+                <div style="font-size:1.3rem;margin-bottom:15px;">Сообщение от администратора</div>
+                <div>${text}</div>
+                <button class="modal-btn green closeModal">Ок</button>
+            </div>`;
+            document.body.appendChild(overlay);
+            overlay.querySelector('.closeModal').onclick = () => {
+                overlay.remove();
+                sessionStorage.setItem('notif_shown', '1');
+            };
+            setTimeout(() => {
+                if (overlay.parentNode) overlay.remove();
+                sessionStorage.setItem('notif_shown', '1');
+            }, 10000);
+        }
     }
 
     document.getElementById('continueBtn').onclick = () => {
@@ -256,6 +289,7 @@
         if (!u || !p) return document.getElementById('loginError').textContent = 'Заполните все поля';
         const user = users.find(x => x.username === u && x.password === p);
         if (!user) return document.getElementById('loginError').textContent = 'Неверный ник или пароль';
+        if (user.banned) return document.getElementById('loginError').textContent = 'Аккаунт заблокирован';
         currentUsername = u; sessionStorage.setItem('tonbet_current', u);
         document.getElementById('loginUsername').value = ''; document.getElementById('loginPassword').value = '';
         showMain();
@@ -267,7 +301,7 @@
         if (!u || !p || !pc) return document.getElementById('regError').textContent = 'Заполните все поля';
         if (p !== pc) return document.getElementById('regError').textContent = 'Пароли не совпадают';
         if (users.some(x => x.username === u)) return document.getElementById('regError').textContent = 'Ник занят';
-        users.push({ username: u, password: p, balance: 1000, bets: [], role: 'user' });
+        users.push({ username: u, password: p, balance: 1000, bets: [], role: 'user', banned: false });
         await saveUsers();
         alert('Регистрация успешна!');
         document.getElementById('regUsername').value = ''; document.getElementById('regPassword').value = '';
@@ -295,7 +329,9 @@
         if (user && user.role === 'admin') {
             if (tab === 'adminManage') renderAdminManage();
             else if (tab === 'adminAdd') renderAdminAdd();
-            else if (tab === 'adminResults') renderAdminResults();
+            else if (tab === 'adminUsers') renderAdminUsers();
+            else if (tab === 'adminNotifications') renderAdminNotifications();
+            else if (tab === 'adminExport') renderAdminExport();
         } else {
             if (tab === 'matches') renderMatches();
             else if (tab === 'express') renderExpress();
@@ -306,7 +342,8 @@
         }
     }
 
-    // ---------- ЭКСПРЕСС ----------
+    // ---------- ПОЛЬЗОВАТЕЛЬСКИЕ ВКЛАДКИ (без изменений) ----------
+    // Экспресс
     let expressState = { step:'divisions', sel:[], div:null, outcomes:{}, totalOdds:0 };
     function renderExpress() {
         if (expressState.step === 'divisions') {
@@ -371,7 +408,7 @@
         }
     }
 
-    // ---------- МАТЧИ ----------
+    // Матчи
     let matchState = { view:'divisions', div:null, match:null };
     function renderMatches() {
         if (matchState.view === 'divisions') {
@@ -433,7 +470,7 @@
         }
     }
 
-    // ---------- МОИ СТАВКИ ----------
+    // Мои ставки
     function renderMyBets() {
         const user = getCurrentUser();
         if (!user) { els.tab.innerHTML = '<div class="section-title">Войдите заново</div>'; return; }
@@ -475,7 +512,7 @@
         els.tab.querySelectorAll('.filter-tab').forEach(t => t.onclick = () => { currentFilter = t.dataset.f; renderMyBets(); });
     }
 
-    // ---------- ПРОФИЛЬ ----------
+    // Профиль
     function renderProfile() {
         const user = getCurrentUser();
         if (!user) { els.tab.innerHTML = '<div class="section-title">Войдите заново</div>'; return; }
@@ -494,7 +531,7 @@
         els.tab.querySelector('#logoutProfileBtn').onclick = logout;
     }
 
-    // ---------- ИНФО ----------
+    // Инфо
     const news = [{ title:'СТАРТ ПРОЕКТА', text:'TonBet запущен! Ставки на ФТКЛ, зарабатывайте коины.' }];
     function renderNews() {
         const total = users.filter(u => u.role !== 'admin').length;
@@ -509,7 +546,7 @@
         els.tab.querySelectorAll('.news-item').forEach(n => n.onclick = () => document.getElementById(`nd${n.dataset.idx}`).classList.toggle('hidden'));
     }
 
-    // ---------- ТОП 10 ----------
+    // Топ 10
     function renderLeaderboard() {
         const stats = users.filter(u => u.role !== 'admin').map(u => {
             const bets = u.bets || [];
@@ -527,32 +564,146 @@
         els.tab.innerHTML = html;
     }
 
-    // ---------- АДМИНКА ----------
+    // ---------- АДМИНКА (полная, с добавлением матчей) ----------
     function renderAdminManage() {
         let html = '<div class="section-title">Управление матчами</div>';
+        html += `<div style="margin-bottom:10px;">
+            <button class="action-btn" id="massOpenBtn">Открыть все линии</button>
+            <button class="action-btn" id="massCloseBtn">Закрыть все линии</button>
+            <button class="action-btn" id="deleteAllMatchesBtn">Удалить все матчи</button>
+        </div>`;
         if (matches.length === 0) html += '<p style="color:#aaa;">Нет матчей</p>';
         else matches.forEach(m => {
             html += `<div style="background:var(--card-bg);border-radius:18px;padding:15px;margin-bottom:12px;">
                 <strong>${m.team1} — ${m.team2}</strong> (${m.division})<br>
                 Статус: ${m.status==='open'?'Открыт':'Закрыт'}, Счёт: ${m.score?m.score.t1+':'+m.score.t2:'—'}<br>
-                ${m.status==='open'?`<button class="action-btn closeLine" data-id="${m.id}">Закрыть линию</button>`:''}
-                ${m.status==='closed'&&!m.score?`<button class="action-btn openLine" data-id="${m.id}">Открыть линию</button>`:''}
-                ${m.status==='closed'&&!m.score?`<button class="action-btn setScoreBtn" data-id="${m.id}">Установить счёт</button>`:''}
+                ${m.status==='open'?`<button class="action-btn closeLine" data-id="${m.id}">Закрыть</button>`:''}
+                ${m.status==='closed'&&!m.score?`<button class="action-btn openLine" data-id="${m.id}">Открыть</button>`:''}
+                ${!m.score?`<button class="action-btn editMatch" data-id="${m.id}">Изменить</button>`:''}
+                <button class="action-btn deleteMatch" data-id="${m.id}">Удалить</button>
+                <button class="action-btn viewBets" data-id="${m.id}">Ставки</button>
+                ${m.status==='closed'&&!m.score?`<button class="action-btn setScoreBtn" data-id="${m.id}">Счёт</button>`:''}
             </div>`;
         });
         els.tab.innerHTML = html;
+        document.getElementById('massOpenBtn')?.addEventListener('click', async () => { matches.forEach(m => m.status = 'open'); await saveMatches(); renderTab('adminManage'); });
+        document.getElementById('massCloseBtn')?.addEventListener('click', async () => { matches.forEach(m => m.status = 'closed'); await saveMatches(); renderTab('adminManage'); });
+        document.getElementById('deleteAllMatchesBtn')?.addEventListener('click', async () => { if(confirm('Удалить все матчи?')){ matches = []; await saveMatches(); renderTab('adminManage'); } });
         els.tab.querySelectorAll('.closeLine').forEach(b => b.onclick = async () => { const m = matches.find(x => x.id === b.dataset.id); if (m) { m.status = 'closed'; await saveMatches(); renderTab('adminManage'); } });
         els.tab.querySelectorAll('.openLine').forEach(b => b.onclick = async () => { const m = matches.find(x => x.id === b.dataset.id); if (m) { m.status = 'open'; await saveMatches(); renderTab('adminManage'); } });
-        els.tab.querySelectorAll('.setScoreBtn').forEach(b => b.onclick = () => { currentTab = 'adminResults'; document.querySelectorAll('#adminBottomNav .nav-item').forEach(i => i.classList.remove('active')); document.querySelector('#adminBottomNav .nav-item[data-tab="adminResults"]').classList.add('active'); renderAdminResults(b.dataset.id); });
+        els.tab.querySelectorAll('.deleteMatch').forEach(b => b.onclick = async () => { if(confirm('Удалить матч?')){ matches = matches.filter(x => x.id !== b.dataset.id); await saveMatches(); renderTab('adminManage'); } });
+        els.tab.querySelectorAll('.editMatch').forEach(b => b.onclick = () => renderEditMatch(b.dataset.id));
+        els.tab.querySelectorAll('.viewBets').forEach(b => b.onclick = () => renderMatchBets(b.dataset.id));
+        els.tab.querySelectorAll('.setScoreBtn').forEach(b => b.onclick = () => renderAdminResults(b.dataset.id));
     }
 
+    function renderEditMatch(matchId) {
+        const m = matches.find(x => x.id === matchId);
+        if (!m) return;
+        els.tab.innerHTML = `<div class="back-link" id="backToManage">← Назад</div>
+            <div class="section-title">Редактировать матч</div>
+            <div class="input-group"><label>Команда 1</label><input type="text" id="editTeam1" value="${m.team1}"></div>
+            <div class="input-group"><label>Команда 2</label><input type="text" id="editTeam2" value="${m.team2}"></div>
+            <div class="input-group"><label>Коэф. П1</label><input type="number" step="0.01" id="editOdds1" value="${m.odds['1']}"></div>
+            <div class="input-group"><label>Коэф. Ничья</label><input type="number" step="0.01" id="editOddsX" value="${m.odds['X']}"></div>
+            <div class="input-group"><label>Коэф. П2</label><input type="number" step="0.01" id="editOdds2" value="${m.odds['2']}"></div>
+            <div class="input-group"><label>ТБ 2.5</label><input type="number" step="0.01" id="editOddsTB" value="${m.odds_TB}"></div>
+            <div class="input-group"><label>ТМ 2.5</label><input type="number" step="0.01" id="editOddsTM" value="${m.odds_TM}"></div>
+            <div class="input-group"><label>ОЗ</label><input type="number" step="0.01" id="editOddsOZ" value="${m.odds_OZ}"></div>
+            <button class="action-btn" id="saveEditBtn">Сохранить</button>`;
+        document.getElementById('backToManage').onclick = () => renderTab('adminManage');
+        document.getElementById('saveEditBtn').onclick = async () => {
+            m.team1 = document.getElementById('editTeam1').value.trim();
+            m.team2 = document.getElementById('editTeam2').value.trim();
+            m.odds = { '1': +document.getElementById('editOdds1').value, 'X': +document.getElementById('editOddsX').value, '2': +document.getElementById('editOdds2').value };
+            m.odds_TB = +document.getElementById('editOddsTB').value;
+            m.odds_TM = +document.getElementById('editOddsTM').value;
+            m.odds_OZ = +document.getElementById('editOddsOZ').value;
+            await saveMatches();
+            alert('Матч обновлён');
+            renderTab('adminManage');
+        };
+    }
+
+    function renderMatchBets(matchId) {
+        const m = matches.find(x => x.id === matchId);
+        if (!m) return;
+        const allBets = [];
+        users.forEach(u => (u.bets||[]).forEach(b => { if (b.matchId === matchId) allBets.push({...b, username: u.username}); }));
+        let html = `<div class="back-link" id="backToManage">← Назад</div><div class="section-title">Ставки на ${m.team1} — ${m.team2}</div>`;
+        if (allBets.length === 0) html += '<p style="color:#aaa;">Нет ставок</p>';
+        else {
+            const totalAmount = allBets.reduce((s,b) => s + b.amount, 0);
+            html += `<p>Всего ставок: ${allBets.length}, сумма: ${totalAmount.toFixed(2)}</p>`;
+            allBets.forEach(b => {
+                const outcome = b.outcome==='TB'?'ТБ 2.5':b.outcome==='TM'?'ТМ 2.5':b.outcome==='OZ'?'ОЗ':(b.outcome==='1'?'П1':b.outcome==='X'?'Ничья':'П2');
+                html += `<div style="background:var(--card-bg);border-radius:12px;padding:10px;margin-bottom:6px;">
+                    <strong>${b.username}</strong> — ${outcome} @ ${b.odds} | Сумма: ${b.amount.toFixed(2)} | Статус: ${b.status}
+                </div>`;
+            });
+        }
+        els.tab.innerHTML = html;
+        document.getElementById('backToManage').onclick = () => renderTab('adminManage');
+    }
+
+    function renderAdminResults(matchId) {
+        const m = matches.find(x => x.id === matchId);
+        if (!m) return;
+        els.tab.innerHTML = `<div class="back-link" id="backToManage">← Назад</div>
+            <div class="section-title">Ввод счёта: ${m.team1} — ${m.team2}</div>
+            <div style="display:flex;gap:10px;align-items:center;margin-top:10px;">
+                <input type="number" class="scoreT1" placeholder="${m.team1}" style="width:60px;background:#0f0f1a;color:white;padding:10px;border-radius:12px;">
+                <span>:</span>
+                <input type="number" class="scoreT2" placeholder="${m.team2}" style="width:60px;background:#0f0f1a;color:white;padding:10px;border-radius:12px;">
+                <button class="action-btn" id="saveScoreBtn">Сохранить</button>
+            </div>`;
+        document.getElementById('backToManage').onclick = () => renderTab('adminManage');
+        document.getElementById('saveScoreBtn').onclick = async () => {
+            const t1 = +els.tab.querySelector('.scoreT1').value, t2 = +els.tab.querySelector('.scoreT2').value;
+            if (isNaN(t1)||isNaN(t2)) return alert('Введите числа');
+            m.score = {t1,t2}; m.result = (t1>t2)?'1':(t1===t2)?'X':'2';
+            await saveMatches();
+            users.forEach(u => (u.bets||[]).forEach(bet => {
+                if (bet.status !== 'pending') return;
+                if (bet.type === 'single' && bet.matchId === matchId) {
+                    let win = false;
+                    if (['1','X','2'].includes(bet.outcome)) win = bet.outcome === m.result;
+                    else if (bet.outcome === 'TB') win = (t1+t2)>2.5;
+                    else if (bet.outcome === 'TM') win = (t1+t2)<2.5;
+                    else if (bet.outcome === 'OZ') win = t1>0 && t2>0;
+                    bet.status = win?'win':'lose'; if(win){ bet.winAmount = bet.amount*bet.odds; u.balance += bet.winAmount; }
+                } else if (bet.type === 'express') {
+                    const allRes = bet.legs.every(l => { const m2 = matches.find(x => x.id === l.matchId); return m2 && m2.score; });
+                    if (allRes) {
+                        const allWin = bet.legs.every(l => {
+                            const m2 = matches.find(x => x.id === l.matchId);
+                            if (['1','X','2'].includes(l.outcome)) return l.outcome === m2.result;
+                            if (l.outcome === 'TB') return (m2.score.t1+m2.score.t2)>2.5;
+                            if (l.outcome === 'TM') return (m2.score.t1+m2.score.t2)<2.5;
+                            if (l.outcome === 'OZ') return m2.score.t1>0 && m2.score.t2>0;
+                        });
+                        bet.status = allWin?'win':'lose'; if(allWin){ bet.winAmount = bet.amount*bet.totalOdds; u.balance += bet.winAmount; }
+                    }
+                }
+            }));
+            await saveUsers();
+            alert('Счёт сохранён, ставки рассчитаны');
+            renderTab('adminManage');
+        };
+    }
+
+    // Добавить матч (новая вкладка)
     function renderAdminAdd() {
-        els.tab.innerHTML = `<div class="section-title">Добавить матч</div>
-            <div class="input-group"><label>Дивизион</label><select id="newDiv">${DIVISIONS.map(d => `<option>${d}</option>`).join('')}</select></div>
+        els.tab.innerHTML = `
+            <div class="section-title">Добавить матч</div>
+            <div class="input-group"><label>Дивизион</label><select id="newDivision">${DIVISIONS.map(d => `<option>${d}</option>`).join('')}</select></div>
             <div class="input-group"><label>Команда 1</label><input type="text" id="newTeam1" placeholder="Название"></div>
             <div class="input-group"><label>Команда 2</label><input type="text" id="newTeam2" placeholder="Название"></div>
-            <div id="calcOdds" style="display:none;margin:15px 0;">
-                <div class="odds-row">
+            <div id="calculatedOdds" style="margin:15px 0; display:none;">
+                <div class="form-info" style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                    <span id="form1Info"></span><span id="form2Info"></span>
+                </div>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
                     <div class="odd-block"><div>П1</div><div class="odd-value" id="odd1">—</div></div>
                     <div class="odd-block"><div>Ничья</div><div class="odd-value" id="oddX">—</div></div>
                     <div class="odd-block"><div>П2</div><div class="odd-value" id="odd2">—</div></div>
@@ -561,89 +712,129 @@
                     <div class="odd-block"><div>ОЗ</div><div class="odd-value" id="oddOZ">—</div></div>
                 </div>
             </div>
-            <button class="action-btn" id="calcBtn">Рассчитать коэффициенты</button>
-            <button class="action-btn" id="addMatchBtn" style="display:none;margin-top:10px;">Добавить матч</button>`;
-        let odds = null;
-        document.getElementById('calcBtn').onclick = () => {
-            const t1 = document.getElementById('newTeam1').value.trim(), t2 = document.getElementById('newTeam2').value.trim();
-            if (!t1 || !t2) return alert('Введите обе команды');
+            <button class="action-btn" id="calcOddsBtn">Рассчитать коэффициенты</button>
+            <button class="action-btn" id="addMatchBtn" style="display:none; margin-top:10px;">Добавить матч</button>`;
+        let calculatedOdds = null;
+        document.getElementById('calcOddsBtn').onclick = () => {
+            const t1 = document.getElementById('newTeam1').value.trim();
+            const t2 = document.getElementById('newTeam2').value.trim();
+            if (!t1 || !t2) return alert('Введите названия обеих команд');
             const ev1 = evaluateTeam(t1), ev2 = evaluateTeam(t2);
-            odds = autoOdds(ev1, ev2);
-            ['1','X','2','TB','TM','OZ'].forEach(k => document.getElementById('odd'+k).textContent = odds[k].toFixed(2));
-            document.getElementById('calcOdds').style.display = 'block';
+            calculatedOdds = autoOdds(ev1, ev2);
+            document.getElementById('odd1').textContent = calculatedOdds['1'].toFixed(2);
+            document.getElementById('oddX').textContent = calculatedOdds['X'].toFixed(2);
+            document.getElementById('odd2').textContent = calculatedOdds['2'].toFixed(2);
+            document.getElementById('oddTB').textContent = calculatedOdds['TB'].toFixed(2);
+            document.getElementById('oddTM').textContent = calculatedOdds['TM'].toFixed(2);
+            document.getElementById('oddOZ').textContent = calculatedOdds['OZ'].toFixed(2);
+            document.getElementById('form1Info').innerHTML = `${t1}: сила ${calculatedOdds.form1} (матчей: ${calculatedOdds.matches1})`;
+            document.getElementById('form2Info').innerHTML = `${t2}: сила ${calculatedOdds.form2} (матчей: ${calculatedOdds.matches2})`;
+            document.getElementById('calculatedOdds').style.display = 'block';
             document.getElementById('addMatchBtn').style.display = 'inline-block';
         };
         document.getElementById('addMatchBtn').onclick = async () => {
-            if (!odds) return;
-            const d = document.getElementById('newDiv').value;
-            const t1 = document.getElementById('newTeam1').value.trim(), t2 = document.getElementById('newTeam2').value.trim();
-            matches.push({ id:'m_'+Date.now(), division:d, team1:t1, team2:t2, odds:{ '1':odds['1'], 'X':odds['X'], '2':odds['2'] }, odds_TB:odds['TB'], odds_TM:odds['TM'], odds_OZ:odds['OZ'], status:'open', score:null, result:null });
+            if (!calculatedOdds) return;
+            const div = document.getElementById('newDivision').value;
+            const t1 = document.getElementById('newTeam1').value.trim();
+            const t2 = document.getElementById('newTeam2').value.trim();
+            if (!t1 || !t2) return alert('Введите названия команд');
+            matches.push({
+                id: 'm_' + Date.now(),
+                division: div,
+                team1: t1,
+                team2: t2,
+                odds: { '1': calculatedOdds['1'], 'X': calculatedOdds['X'], '2': calculatedOdds['2'] },
+                odds_TB: calculatedOdds['TB'],
+                odds_TM: calculatedOdds['TM'],
+                odds_OZ: calculatedOdds['OZ'],
+                status: 'open',
+                score: null,
+                result: null
+            });
             await saveMatches();
             alert('Матч добавлен!');
-            document.getElementById('newTeam1').value = ''; document.getElementById('newTeam2').value = '';
-            document.getElementById('calcOdds').style.display = 'none'; document.getElementById('addMatchBtn').style.display = 'none';
-            odds = null;
+            document.getElementById('newTeam1').value = '';
+            document.getElementById('newTeam2').value = '';
+            document.getElementById('calculatedOdds').style.display = 'none';
+            document.getElementById('addMatchBtn').style.display = 'none';
+            calculatedOdds = null;
         };
     }
 
-    function renderAdminResults() {
-        const list = matches.filter(m => m.status === 'closed' && !m.score);
-        let html = '<div class="section-title">Ввод счёта</div>';
-        if (list.length === 0) html += '<p style="color:#aaa;">Нет матчей для ввода счёта</p>';
-        else list.forEach(m => {
-            html += `<div style="background:var(--card-bg);border-radius:18px;padding:15px;margin-bottom:12px;">
-                <strong>${m.team1} — ${m.team2}</strong> (${m.division})<br>
-                <div style="display:flex;gap:10px;align-items:center;margin-top:10px;">
-                    <input type="number" class="scoreT1" placeholder="${m.team1}" style="width:60px;background:#0f0f1a;color:white;padding:10px;border-radius:12px;">
-                    <span>:</span>
-                    <input type="number" class="scoreT2" placeholder="${m.team2}" style="width:60px;background:#0f0f1a;color:white;padding:10px;border-radius:12px;">
-                    <button class="action-btn saveScore" data-id="${m.id}">Сохранить</button>
-                </div></div>`;
+    // Остальные функции админки (пользователи, уведомления, экспорт) остаются без изменений
+    function renderAdminUsers() {
+        let html = '<div class="section-title">Пользователи</div>';
+        users.forEach(u => {
+            if (u.role === 'admin') return;
+            html += `<div style="background:var(--card-bg);border-radius:14px;padding:12px;margin-bottom:8px;">
+                <strong>${u.username}</strong> (Баланс: ${u.balance.toFixed(2)}) ${u.banned ? '<span style="color:red;">ЗАБАНЕН</span>' : ''}<br>
+                <input type="number" placeholder="Новый баланс" class="newBalance" data-uid="${u.username}" style="width:100px; margin-right:5px;">
+                <button class="action-btn setBalance" data-uid="${u.username}">Уст. баланс</button>
+                <button class="action-btn toggleBan" data-uid="${u.username}">${u.banned ? 'Разбанить' : 'Забанить'}</button>
+            </div>`;
         });
         els.tab.innerHTML = html;
-        els.tab.querySelectorAll('.saveScore').forEach(b => b.onclick = async () => {
-            const id = b.dataset.id;
-            const t1 = +b.parentElement.querySelector('.scoreT1').value, t2 = +b.parentElement.querySelector('.scoreT2').value;
-            if (isNaN(t1) || isNaN(t2)) return alert('Введите числа');
-            const m = matches.find(x => x.id === id);
-            if (m) {
-                m.score = { t1, t2 }; m.result = (t1 > t2) ? '1' : (t1 === t2) ? 'X' : '2';
-                await saveMatches();
-                users.forEach(u => {
-                    const bets = u.bets || [];
-                    bets.forEach(bet => {
-                        if (bet.status !== 'pending') return;
-                        if (bet.type === 'single' && bet.matchId === id) {
-                            let win = false;
-                            if (['1','X','2'].includes(bet.outcome)) win = bet.outcome === m.result;
-                            else if (bet.outcome === 'TB') win = (t1 + t2) > 2.5;
-                            else if (bet.outcome === 'TM') win = (t1 + t2) < 2.5;
-                            else if (bet.outcome === 'OZ') win = t1 > 0 && t2 > 0;
-                            bet.status = win ? 'win' : 'lose'; if (win) { bet.winAmount = bet.amount * bet.odds; u.balance += bet.winAmount; }
-                        } else if (bet.type === 'express') {
-                            const allRes = bet.legs.every(l => { const m2 = matches.find(x => x.id === l.matchId); return m2 && m2.score; });
-                            if (allRes) {
-                                const allWin = bet.legs.every(l => {
-                                    const m2 = matches.find(x => x.id === l.matchId);
-                                    if (['1','X','2'].includes(l.outcome)) return l.outcome === m2.result;
-                                    if (l.outcome === 'TB') return (m2.score.t1 + m2.score.t2) > 2.5;
-                                    if (l.outcome === 'TM') return (m2.score.t1 + m2.score.t2) < 2.5;
-                                    if (l.outcome === 'OZ') return m2.score.t1 > 0 && m2.score.t2 > 0;
-                                });
-                                bet.status = allWin ? 'win' : 'lose'; if (allWin) { bet.winAmount = bet.amount * bet.totalOdds; u.balance += bet.winAmount; }
-                            }
-                        }
-                    });
-                });
-                await saveUsers();
-                alert('Счёт сохранён, ставки рассчитаны!'); renderTab('adminResults');
-            }
+        els.tab.querySelectorAll('.setBalance').forEach(b => b.onclick = async () => {
+            const user = users.find(u => u.username === b.dataset.uid);
+            const input = els.tab.querySelector(`.newBalance[data-uid="${b.dataset.uid}"]`);
+            const val = +input.value;
+            if (isNaN(val)) return alert('Введите число');
+            user.balance = val;
+            await saveUsers();
+            renderTab('adminUsers');
+        });
+        els.tab.querySelectorAll('.toggleBan').forEach(b => b.onclick = async () => {
+            const user = users.find(u => u.username === b.dataset.uid);
+            user.banned = !user.banned;
+            await saveUsers();
+            renderTab('adminUsers');
         });
     }
 
-    function evaluateTeam(teamName) {
+    function renderAdminNotifications() {
+        els.tab.innerHTML = `
+            <div class="section-title">Уведомления</div>
+            <div class="input-group"><label>Сообщение</label><input type="text" id="notifText" placeholder="Введите текст"></div>
+            <button class="action-btn" id="sendNotif">Отправить всем</button>
+            <div style="margin-top:20px;color:#aaa;">Текущее уведомление: <span id="currentNotif"></span></div>
+            <button class="action-btn" id="clearNotif" style="margin-top:10px;">Очистить</button>`;
+        db.ref('notification').once('value', snap => {
+            document.getElementById('currentNotif').textContent = snap.val() || 'Нет';
+        });
+        document.getElementById('sendNotif').onclick = async () => {
+            const text = document.getElementById('notifText').value.trim();
+            if (!text) return alert('Введите сообщение');
+            await db.ref('notification').set(text);
+            alert('Отправлено');
+            renderTab('adminNotifications');
+        };
+        document.getElementById('clearNotif').onclick = async () => {
+            await db.ref('notification').set(null);
+            renderTab('adminNotifications');
+        };
+    }
+
+    function renderAdminExport() {
+        let csv = 'Username,Balance,Bets,Role,Banned\n';
+        users.forEach(u => {
+            csv += `${u.username},${u.balance.toFixed(2)},${(u.bets||[]).length},${u.role},${u.banned||false}\n`;
+        });
+        els.tab.innerHTML = `
+            <div class="section-title">Экспорт</div>
+            <textarea style="width:100%;height:200px;background:#0f0f1a;color:white;border-radius:12px;padding:10px;">${csv}</textarea>
+            <button class="action-btn" id="copyCsvBtn">Копировать</button>`;
+        document.getElementById('copyCsvBtn').onclick = () => {
+            navigator.clipboard.writeText(csv).then(() => alert('Скопировано'));
+        };
+    }
+
+    // Вспомогательные функции (без изменений)
+    function getTeamFinishedMatches(teamName) {
         const norm = normName(teamName);
-        const finished = matches.filter(m => m.score && (normName(m.team1) === norm || normName(m.team2) === norm));
+        return matches.filter(m => m.score && (normName(m.team1) === norm || normName(m.team2) === norm));
+    }
+    function evaluateTeam(teamName) {
+        const finished = getTeamFinishedMatches(teamName);
         if (finished.length === 0) return { form:3, crisis:false, matchesCount:0 };
         let points=0, diffTotal=0, bigLosses=0;
         finished.forEach(m => {
@@ -742,4 +933,4 @@
     };
 </script>
 </body>
-    </html>
+</html>
