@@ -4,152 +4,97 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TonBet — Ставки на ФТКЛ</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
-        :root { --primary: #e94560; --primary-dark: #c23152; --bg-glass: rgba(18,22,35,0.8); --border-glass: rgba(255,255,255,0.06); --text: #fff; --text-secondary: #b0b0c0; --success: #2ecc71; --danger: #e74c3c; --card-bg: rgba(255,255,255,0.03); --card-border: rgba(255,255,255,0.05); }
-        * { margin:0; padding:0; box-sizing:border-box; font-family:'Montserrat','Inter','Segoe UI',system-ui,-apple-system,sans-serif; }
-        body { min-height:100vh; display:flex; justify-content:center; align-items:center; padding:10px; color:var(--text); overflow-x:hidden; background:#0b0b14; position:relative; animation:fadeIn 0.5s ease; }
+        :root { --primary:#e94560; --primary-dark:#c23152; --bg-glass:rgba(18,22,35,0.8); --border-glass:rgba(255,255,255,0.06); --text:#fff; --text-secondary:#b0b0c0; --success:#2ecc71; --danger:#e74c3c; --card-bg:rgba(255,255,255,0.04); --card-border:rgba(255,255,255,0.08); }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Montserrat',sans-serif; }
+        body { min-height:100vh; display:flex; justify-content:center; align-items:center; padding:10px; color:var(--text); background:#0b0b14; overflow-x:hidden; position:relative; animation:fadeIn 0.5s ease; }
         @keyframes fadeIn{ from{opacity:0} to{opacity:1} }
-        body::before{ content:''; position:fixed; top:0; left:0; width:100%; height:100%;
-            background: radial-gradient(circle at 30% 40%, rgba(233,69,96,0.12) 0%, transparent 50%),
-                        radial-gradient(circle at 70% 60%, rgba(100,100,255,0.08) 0%, transparent 50%),
-                        radial-gradient(circle at 50% 80%, rgba(0,200,200,0.06) 0%, transparent 50%);
-            animation:bgShift 15s ease-in-out infinite alternate; z-index:-1; }
-        body::after{ content:''; position:fixed; top:-100px; left:-100px; width:300px; height:300px;
-            background:rgba(233,69,96,0.15); border-radius:50%; filter:blur(80px); animation:float1 20s ease-in-out infinite; z-index:-1; }
-        .bg-circle{ position:fixed; border-radius:50%; filter:blur(70px); z-index:-1; pointer-events:none; }
-        .bg-circle.c2{ width:250px; height:250px; background:rgba(100,100,255,0.12); top:60%; right:-80px; animation:float2 25s ease-in-out infinite; }
-        .bg-circle.c3{ width:200px; height:200px; background:rgba(0,200,200,0.1); bottom:-50px; left:30%; animation:float3 18s ease-in-out infinite; }
+        body::before{ content:''; position:fixed; top:0; left:0; width:100%; height:100%; background:radial-gradient(circle at 30% 40%, rgba(233,69,96,0.12) 0%, transparent 50%), radial-gradient(circle at 70% 60%, rgba(100,100,255,0.08) 0%, transparent 50%), radial-gradient(circle at 50% 80%, rgba(0,200,200,0.06) 0%, transparent 50%); animation:bgShift 15s infinite alternate; z-index:-1; }
+        body::after{ content:''; position:fixed; top:-100px; left:-100px; width:300px; height:300px; background:rgba(233,69,96,0.15); border-radius:50%; filter:blur(80px); animation:float1 20s infinite; z-index:-1; }
         @keyframes bgShift{ 0%{opacity:0.8} 100%{opacity:1} }
-        @keyframes float1{ 0%{transform:translate(0,0) scale(1)} 25%{transform:translate(50px,60px) scale(1.1)} 50%{transform:translate(30px,-30px) scale(0.9)} 75%{transform:translate(-20px,40px) scale(1.05)} 100%{transform:translate(0,0) scale(1)} }
-        @keyframes float2{ 0%{transform:translate(0,0)} 33%{transform:translate(-40px,-50px)} 66%{transform:translate(20px,30px)} 100%{transform:translate(0,0)} }
-        @keyframes float3{ 0%{transform:translate(0,0) scale(1)} 50%{transform:translate(-30px,40px) scale(1.2)} 100%{transform:translate(0,0) scale(1)} }
-        .app-container{ width:100%; max-width:480px; background:var(--bg-glass); backdrop-filter:blur(25px); -webkit-backdrop-filter:blur(25px); border-radius:36px;
-            box-shadow:0 30px 70px rgba(0,0,0,0.8),0 0 0 1px rgba(233,69,96,0.2); padding:25px 18px 100px; position:relative; min-height:90vh;
-            display:flex; flex-direction:column; transition:all 0.4s ease; border:1px solid rgba(255,255,255,0.06); animation:fadeInUp 0.6s ease; }
-        @keyframes fadeInUp{ from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
-        .app-container::before{ content:''; position:absolute; inset:0; border-radius:36px;
-            background:radial-gradient(circle at 30% 30%, rgba(255,255,255,0.05) 0%, transparent 50%); pointer-events:none; }
+        @keyframes float1{ 0%{transform:translate(0,0) scale(1)} 50%{transform:translate(60px,50px) scale(1.1)} 100%{transform:translate(0,0) scale(1)} }
+        .app-container{ width:100%; max-width:480px; background:var(--bg-glass); backdrop-filter:blur(25px); -webkit-backdrop-filter:blur(25px); border-radius:36px; box-shadow:0 30px 60px rgba(0,0,0,0.7),0 0 0 1px rgba(233,69,96,0.15); padding:25px 18px 100px; position:relative; min-height:90vh; display:flex; flex-direction:column; border:1px solid rgba(255,255,255,0.06); }
         .hidden{ display:none!important; }
-        #welcomeScreen{ text-align:center; padding:50px 15px; animation:fadeInUp 0.8s ease; }
-        .welcome-logo{ font-size:4.2rem; font-weight:900; letter-spacing:4px;
-            background:linear-gradient(to right, var(--primary) 38%, #ffffff 62%);
-            -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
-            margin-bottom:30px; animation:glowPulse 2s infinite; }
-        @keyframes glowPulse{ 0%{text-shadow:0 0 25px rgba(233,69,96,0.4)} 50%{text-shadow:0 0 45px rgba(233,69,96,0.7)} 100%{text-shadow:0 0 25px rgba(233,69,96,0.4)} }
-        .welcome-text{ font-size:1.2rem; font-weight:400; color:var(--text-secondary); margin:0 auto 40px; line-height:1.6; }
-        .continue-btn{ background:linear-gradient(135deg,var(--primary),var(--primary-dark)); border:none; padding:20px 50px;
-            border-radius:60px; color:white; font-weight:700; font-size:1.4rem; cursor:pointer; transition:all 0.3s;
-            box-shadow:0 10px 25px rgba(233,69,96,0.5); width:85%; max-width:300px; letter-spacing:0.5px; }
-        .continue-btn:active{ transform:scale(0.96); }
-        .auth-form{ background:rgba(255,255,255,0.02); border-radius:32px; padding:35px 25px; border:1px solid var(--border-glass);
-            box-shadow:0 20px 40px rgba(0,0,0,0.5); margin-top:20px; animation:fadeInUp 0.5s ease; }
-        .auth-form h2{ text-align:center; margin-bottom:30px; font-size:2.2rem; color:var(--primary); font-weight:700; }
-        .input-group{ margin-bottom:22px; }
-        .input-group label{ display:block; margin-bottom:8px; color:var(--text-secondary); font-weight:500; font-size:1rem; }
-        .input-group input,.input-group select{ width:100%; padding:18px 20px; background:rgba(10,10,20,0.7); border:1px solid rgba(255,255,255,0.08);
-            border-radius:18px; color:#fff; font-size:1.1rem; outline:none; transition:all 0.3s; }
-        .input-group input:focus,.input-group select:focus{ border-color:var(--primary); box-shadow:0 0 15px rgba(233,69,96,0.25); }
-        .auth-btn{ width:100%; padding:18px; background:var(--primary); border:none; border-radius:18px;
-            color:white; font-weight:700; font-size:1.2rem; cursor:pointer; transition:all 0.3s; margin-top:12px; }
-        .auth-btn:active{ background:#ff4d6a; transform:scale(0.98); }
-        .toggle-link{ text-align:center; margin-top:20px; color:var(--text-secondary); font-size:0.95rem; }
-        .toggle-link a{ color:var(--primary); text-decoration:none; font-weight:600; cursor:pointer; }
-        .error-msg{ color:var(--danger); text-align:center; margin-top:12px; font-size:0.95rem; }
-        .main-header{ display:flex; justify-content:center; align-items:center; margin-bottom:25px;
-            border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:18px; position:relative; }
-        .logo-small{ font-size:2.4rem; font-weight:800; background:linear-gradient(to right,var(--primary) 38%,#ffffff 62%);
-            -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:2px; }
+        #welcomeScreen{ text-align:center; padding:50px 15px; }
+        .welcome-logo{ font-size:4rem; font-weight:900; letter-spacing:4px; background:linear-gradient(to right, var(--primary) 38%, #ffffff 62%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:30px; }
+        .welcome-text{ font-size:1.1rem; color:var(--text-secondary); margin-bottom:40px; }
+        .continue-btn{ background:linear-gradient(135deg, var(--primary), var(--primary-dark)); border:none; padding:18px 50px; border-radius:60px; color:white; font-weight:700; font-size:1.3rem; cursor:pointer; width:85%; max-width:300px; box-shadow:0 10px 25px rgba(233,69,96,0.5); }
+        .auth-form{ background:rgba(255,255,255,0.03); border-radius:30px; padding:30px 25px; border:1px solid var(--border-glass); margin-top:20px; }
+        .auth-form h2{ text-align:center; margin-bottom:25px; font-size:2rem; color:var(--primary); }
+        .input-group{ margin-bottom:20px; }
+        .input-group label{ display:block; margin-bottom:6px; color:var(--text-secondary); font-size:0.9rem; }
+        .input-group input{ width:100%; padding:16px; background:rgba(10,10,20,0.7); border:1px solid rgba(255,255,255,0.1); border-radius:16px; color:#fff; font-size:1rem; outline:none; }
+        .input-group input:focus{ border-color:var(--primary); }
+        .auth-btn{ width:100%; padding:16px; background:var(--primary); border:none; border-radius:18px; color:white; font-weight:700; font-size:1.1rem; cursor:pointer; margin-top:10px; }
+        .toggle-link{ text-align:center; margin-top:15px; color:var(--text-secondary); font-size:0.9rem; }
+        .toggle-link a{ color:var(--primary); text-decoration:none; cursor:pointer; }
+        .error-msg{ color:var(--danger); text-align:center; margin-top:10px; font-size:0.9rem; }
+        .main-header{ display:flex; justify-content:center; align-items:center; margin-bottom:25px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:18px; }
+        .logo-small{ font-size:2.2rem; font-weight:800; background:linear-gradient(to right, var(--primary) 38%, #ffffff 62%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
         .header-right{ position:absolute; right:0; top:50%; transform:translateY(-50%); }
-        .logout-header-btn{ background:rgba(255,255,255,0.05); border:1px solid rgba(233,69,96,0.5); color:#fff;
-            padding:8px 16px; border-radius:12px; font-weight:600; cursor:pointer; font-size:0.9rem; transition:all 0.2s; }
-        .logout-header-btn:active{ background:var(--primary); transform:scale(0.95); }
-        .bottom-nav{ position:fixed; bottom:15px; left:50%; transform:translateX(-50%);
-            width:calc(100% - 30px); max-width:450px; background:rgba(20,25,40,0.9);
-            backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-radius:30px; display:flex; justify-content:space-around;
-            align-items:center; padding:8px 10px; box-shadow:0 10px 30px rgba(0,0,0,0.5); border:1px solid rgba(233,69,96,0.15); z-index:10; }
-        .nav-item{ flex:1 1 auto; display:flex; flex-direction:column; align-items:center; justify-content:center;
-            color:#8888a0; font-size:0.55rem; font-weight:500; cursor:pointer; transition:all 0.2s;
-            padding:6px 2px; border-radius:20px; gap:2px; text-align:center; line-height:1.2; word-break:break-word; hyphens:auto; }
+        .logout-btn{ background:rgba(255,255,255,0.05); border:1px solid rgba(233,69,96,0.5); color:#fff; padding:8px 16px; border-radius:12px; font-weight:600; font-size:0.9rem; cursor:pointer; }
+        .bottom-nav{ position:fixed; bottom:15px; left:50%; transform:translateX(-50%); width:calc(100% - 30px); max-width:450px; background:rgba(20,25,40,0.9); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-radius:30px; display:flex; justify-content:space-around; padding:10px 8px; box-shadow:0 10px 30px rgba(0,0,0,0.5); border:1px solid rgba(233,69,96,0.15); z-index:10; }
+        .nav-item{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#8888a0; font-size:0.55rem; font-weight:500; cursor:pointer; padding:6px 2px; border-radius:18px; gap:3px; text-align:center; }
         .nav-item.active{ color:var(--primary); background:rgba(233,69,96,0.1); }
         .nav-item svg{ width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:2; }
-        .tab-content{ flex:1; animation:fadeInUp 0.35s ease; padding-bottom:20px; }
-        .section-title{ font-size:1.4rem; font-weight:700; margin-bottom:20px; border-left:5px solid var(--primary); padding-left:18px; color:#f0f0ff; }
-        .division-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:12px; margin-bottom:25px; }
-        .division-card{ background:var(--card-bg); border:1px solid var(--card-border); border-radius:18px;
-            padding:22px 12px; text-align:center; font-weight:600; cursor:pointer; transition:all 0.2s; font-size:0.95rem; }
-        .division-card:active{ background:rgba(233,69,96,0.2); border-color:var(--primary); transform:scale(0.98); }
-        .match-list{ display:flex; flex-direction:column; gap:12px; }
-        .match-item{ background:var(--card-bg); border:1px solid var(--card-border); border-radius:20px;
-            padding:18px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; transition:all 0.2s; font-size:1rem; }
-        .match-item:active{ border-color:var(--primary); background:rgba(233,69,96,0.08); transform:scale(0.99); }
+        .tab-content{ flex:1; padding-bottom:20px; }
+        .section-title{ font-size:1.3rem; font-weight:700; margin-bottom:18px; border-left:4px solid var(--primary); padding-left:15px; color:#f0f0ff; }
+        .division-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:10px; margin-bottom:20px; }
+        .division-card{ background:var(--card-bg); border:1px solid var(--card-border); border-radius:16px; padding:20px; text-align:center; font-weight:600; cursor:pointer; font-size:0.9rem; }
+        .division-card:active{ background:rgba(233,69,96,0.2); border-color:var(--primary); }
+        .match-list{ display:flex; flex-direction:column; gap:10px; }
+        .match-item{ background:var(--card-bg); border:1px solid var(--card-border); border-radius:18px; padding:16px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; font-size:1rem; }
+        .match-item:active{ background:rgba(233,69,96,0.1); border-color:var(--primary); }
         .match-item.selected{ border-color:var(--primary); background:rgba(233,69,96,0.15); }
-        .match-item .check-icon{ width:24px; height:24px; border:2px solid #8888a0; border-radius:8px; display:flex; align-items:center; justify-content:center; transition:0.2s; }
+        .match-item .check-icon{ width:22px; height:22px; border:2px solid #8888a0; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:0.9rem; }
         .match-item.selected .check-icon{ background:var(--primary); border-color:var(--primary); color:white; }
-        .back-link{ color:var(--primary); cursor:pointer; font-weight:600; margin-bottom:18px; display:inline-block; font-size:1rem; }
-        .bet-detail{ background:var(--card-bg); border-radius:22px; padding:22px; border:1px solid var(--card-border); animation:fadeInUp 0.3s ease; }
-        .odds-row{ display:flex; gap:12px; margin:22px 0; flex-wrap:wrap; }
-        .odd-block{ flex:1; min-width:70px; background:rgba(0,0,0,0.4); border:2px solid transparent;
-            border-radius:18px; padding:18px 10px; text-align:center; cursor:pointer; font-weight:600; transition:all 0.2s; }
-        .odd-block.selected{ border-color:var(--primary); background:rgba(233,69,96,0.2); transform:scale(1.02); }
-        .odd-block:active{ transform:scale(0.98); }
-        .odd-value{ font-size:1.5rem; color:var(--primary); font-weight:800; }
-        .bet-amount-input{ padding:16px; border-radius:16px; background:#0f0f1a; border:1px solid rgba(255,255,255,0.1);
-            color:white; width:140px; font-size:1.1rem; margin-right:10px; }
-        .action-btn{ background:var(--primary); border:none; padding:16px 24px; border-radius:16px;
-            color:white; font-weight:700; cursor:pointer; transition:all 0.2s; font-size:1rem; box-shadow:0 5px 15px rgba(233,69,96,0.4); }
+        .back-link{ color:var(--primary); cursor:pointer; font-weight:600; margin-bottom:15px; display:inline-block; }
+        .bet-detail{ background:var(--card-bg); border-radius:20px; padding:20px; border:1px solid var(--card-border); }
+        .odds-row{ display:flex; gap:10px; margin:20px 0; flex-wrap:wrap; }
+        .odd-block{ flex:1; min-width:70px; background:rgba(0,0,0,0.4); border:2px solid transparent; border-radius:16px; padding:15px 8px; text-align:center; cursor:pointer; font-weight:600; }
+        .odd-block.selected{ border-color:var(--primary); background:rgba(233,69,96,0.2); }
+        .odd-value{ font-size:1.4rem; color:var(--primary); font-weight:800; }
+        .bet-amount-input{ padding:14px; border-radius:14px; background:#0f0f1a; border:1px solid rgba(255,255,255,0.1); color:white; width:130px; font-size:1rem; margin-right:10px; }
+        .action-btn{ background:var(--primary); border:none; padding:15px 22px; border-radius:15px; color:white; font-weight:700; cursor:pointer; font-size:0.95rem; box-shadow:0 4px 12px rgba(233,69,96,0.4); }
         .action-btn:active{ background:#ff5e7a; transform:scale(0.97); }
         .action-btn:disabled{ opacity:0.5; pointer-events:none; }
-        .profile-stat{ background:var(--card-bg); padding:16px 20px; border-radius:16px; margin-bottom:12px; display:flex; justify-content:space-between; font-size:1rem; border:1px solid var(--card-border); }
-        .news-item{ background:var(--card-bg); border:1px solid var(--card-border); border-radius:18px; padding:16px 20px; margin-bottom:12px; cursor:pointer; font-weight:600; font-size:1rem; transition:0.2s; }
+        .profile-stat{ background:var(--card-bg); padding:14px 18px; border-radius:14px; margin-bottom:10px; display:flex; justify-content:space-between; font-size:0.95rem; border:1px solid var(--card-border); }
+        .news-item{ background:var(--card-bg); border:1px solid var(--card-border); border-radius:16px; padding:14px 18px; margin-bottom:10px; cursor:pointer; font-weight:600; font-size:0.95rem; }
         .news-item:active{ background:rgba(233,69,96,0.1); }
-        .news-detail{ background:rgba(0,0,0,0.3); border-radius:16px; padding:18px; margin-top:8px; color:#ccc; font-size:0.95rem; }
-        .contact-btn{ display:flex; align-items:center; justify-content:center; gap:10px;
-            background:var(--card-bg); border:1px solid rgba(233,69,96,0.4); border-radius:16px;
-            padding:16px; margin-bottom:12px; color:#fff; font-weight:600; text-decoration:none; transition:all 0.2s; }
-        .contact-btn:active{ background:var(--primary); border-color:var(--primary); transform:scale(0.98); }
-        .contact-btn svg{ width:20px; height:20px; }
-        .leaderboard-table{ width:100%; border-collapse:collapse; font-size:0.95rem; }
-        .leaderboard-table th{ text-align:left; padding:12px 10px; border-bottom:1px solid #333; color:#aaa; }
-        .leaderboard-table td{ padding:12px 10px; border-bottom:1px solid #222; }
+        .news-detail{ background:rgba(0,0,0,0.3); border-radius:14px; padding:15px; margin-top:8px; color:#ccc; }
+        .contact-btn{ display:flex; align-items:center; justify-content:center; gap:10px; background:var(--card-bg); border:1px solid rgba(233,69,96,0.4); border-radius:14px; padding:14px; margin-bottom:10px; color:#fff; font-weight:600; text-decoration:none; }
+        .contact-btn svg{ width:18px; height:18px; }
+        .leaderboard-table{ width:100%; border-collapse:collapse; font-size:0.9rem; }
+        .leaderboard-table th{ text-align:left; padding:10px 8px; border-bottom:1px solid #333; color:#aaa; }
+        .leaderboard-table td{ padding:10px 8px; border-bottom:1px solid #222; }
         .profit-positive{ color:var(--success); font-weight:700; }
-        .modal-overlay{ position:fixed; top:0; left:0; width:100%; height:100%;
-            background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); display:flex; justify-content:center; align-items:center; z-index:1000; animation:fadeIn 0.3s; }
-        .modal-content{ background:#1e1e2f; border-radius:30px; padding:30px 25px; text-align:center;
-            max-width:340px; width:90%; box-shadow:0 20px 50px rgba(0,0,0,0.8); animation:modalPop 0.3s; }
-        @keyframes modalPop{ from{transform:scale(0.8); opacity:0} to{transform:scale(1); opacity:1} }
-        .modal-btn{ display:inline-block; margin-top:25px; padding:16px 32px; border-radius:40px;
-            font-weight:700; font-size:1.1rem; border:none; cursor:pointer; width:100%; }
+        .modal-overlay{ position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); display:flex; justify-content:center; align-items:center; z-index:1000; }
+        .modal-content{ background:#1e1e2f; border-radius:28px; padding:25px; text-align:center; max-width:320px; width:90%; box-shadow:0 20px 50px rgba(0,0,0,0.8); }
+        .modal-btn{ margin-top:20px; padding:14px 28px; border-radius:30px; font-weight:700; font-size:1rem; border:none; cursor:pointer; width:100%; }
         .modal-btn.green{ background:var(--success); color:white; }
         .modal-btn.red{ background:var(--danger); color:white; }
-        .filter-tabs{ display:flex; gap:6px; margin-bottom:18px; flex-wrap:wrap; }
-        .filter-tab{ background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:20px;
-            padding:8px 16px; font-size:0.8rem; font-weight:600; cursor:pointer; transition:all 0.2s; }
+        .filter-tabs{ display:flex; gap:5px; margin-bottom:15px; flex-wrap:wrap; }
+        .filter-tab{ background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:7px 14px; font-size:0.75rem; font-weight:600; cursor:pointer; }
         .filter-tab.active{ background:var(--primary); border-color:var(--primary); color:white; }
-        .filter-tab:active{ transform:scale(0.95); }
-        .status-icon{ width:18px; height:18px; vertical-align:middle; margin-right:4px; }
+        .status-icon{ width:16px; height:16px; vertical-align:middle; margin-right:3px; }
         .status-win{ color:var(--success); }
         .status-lose{ color:var(--danger); }
-        .user-counter{ background:rgba(255,255,255,0.02); border:1px solid rgba(233,69,96,0.4); border-radius:20px;
-            padding:20px 15px; margin-top:20px; text-align:center; backdrop-filter:blur(10px); }
-        .user-counter .counter-title{ font-size:0.8rem; font-weight:500; letter-spacing:2px; color:var(--text-secondary); margin-bottom:10px; }
-        .user-counter .counter-number{ font-size:2.8rem; font-weight:800; background:linear-gradient(135deg,#4cff8d,#2ecc71);
-            -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .user-counter{ background:rgba(255,255,255,0.02); border:1px solid rgba(233,69,96,0.4); border-radius:18px; padding:18px; margin-top:20px; text-align:center; }
+        .counter-title{ font-size:0.75rem; font-weight:500; letter-spacing:1.5px; color:var(--text-secondary); margin-bottom:8px; }
+        .counter-number{ font-size:2.5rem; font-weight:800; background:linear-gradient(135deg, #4cff8d, #2ecc71); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
     </style>
 </head>
 <body>
-<div class="bg-circle c2"></div>
-<div class="bg-circle c3"></div>
 <div class="app-container" id="appContainer">
     <div id="welcomeScreen">
         <div class="welcome-logo">TonBet</div>
-        <div class="welcome-text">TonBet – Сайт новостника ФТКЛ. На нашем сайте вы можете ставить ставки на все матчи под эгидой ФТКЛ. Зарабатывайте коины и становитесь лучшими в TonBet!</div>
+        <div class="welcome-text">TonBet – Сайт новостника ФТКЛ. Ставки на все матчи ФТКЛ. Зарабатывайте коины и становитесь лучшими!</div>
         <button class="continue-btn" id="continueBtn">Продолжить</button>
     </div>
+
     <div id="authBlock" class="hidden">
         <div id="loginForm" class="auth-form">
             <h2>Вход</h2>
@@ -169,6 +114,7 @@
             <div class="error-msg" id="regError"></div>
         </div>
     </div>
+
     <div id="mainInterface" class="hidden">
         <div class="main-header">
             <div class="logo-small">TonBet</div>
@@ -177,6 +123,7 @@
         <div id="tabContent" class="tab-content"></div>
     </div>
 </div>
+
 <div id="bottomNav" class="bottom-nav hidden">
     <div class="nav-item active" data-tab="matches"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20"/></svg>Матчи</div>
     <div class="nav-item" data-tab="express"><svg viewBox="0 0 24 24"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Экспресс</div>
@@ -185,435 +132,407 @@
     <div class="nav-item" data-tab="news"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Инфо</div>
     <div class="nav-item" data-tab="leaderboard"><svg viewBox="0 0 24 24"><path d="M6 9l6-6 6 6"/><path d="M6 15l6 6 6-6"/></svg>Топ 10</div>
 </div>
+
 <div id="adminBottomNav" class="bottom-nav hidden">
     <div class="nav-item active" data-tab="adminManage">Управление</div>
     <div class="nav-item" data-tab="adminAdd">Добавить</div>
     <div class="nav-item" data-tab="adminResults">Результаты</div>
 </div>
+
 <script>
-    // Firebase Init
     firebase.initializeApp({
-        apiKey:"AIzaSyCG1FHpgPg3xC9IHZ0SzaPn0Ngxk8IbwS4", authDomain:"tonbetftcl.firebaseapp.com",
-        databaseURL:"https://tonbetftcl-default-rtdb.firebaseio.com", projectId:"tonbetftcl",
-        storageBucket:"tonbetftcl.firebasestorage.app", messagingSenderId:"683608892991",
-        appId:"1:683608892991:web:bd70872ad2f130b8a3ba8a", measurementId:"G-VLH858ZFV7"
+        apiKey: "AIzaSyCG1FHpgPg3xC9IHZ0SzaPn0Ngxk8IbwS4",
+        authDomain: "tonbetftcl.firebaseapp.com",
+        databaseURL: "https://tonbetftcl-default-rtdb.firebaseio.com",
+        projectId: "tonbetftcl",
+        storageBucket: "tonbetftcl.firebasestorage.app",
+        messagingSenderId: "683608892991",
+        appId: "1:683608892991:web:bd70872ad2f130b8a3ba8a"
     });
     const db = firebase.database();
     const DIVISIONS = ['ФТКЛ 1', 'ФТКЛ 3'];
-    let users=[], matches=[];
-    let currentUsername = sessionStorage.getItem('tonbet_current')||null;
-    let currentFilter='all', currentTab='matches';
-    const normalizeTeamName = name => name.toLowerCase().replace(/ё/g,'е');
+    let users = [], matches = [];
+    let currentUsername = sessionStorage.getItem('tonbet_current') || null;
+    let currentFilter = 'all', currentTab = 'matches';
+    const normName = n => n.toLowerCase().replace(/ё/g, 'е');
 
-    async function loadUsers(){
-        const snap=await db.ref('users').once('value');
-        users = snap.val() ? Object.values(snap.val()) : [];
-        const admins=[
-            {username:'admin',password:'admin123',role:'admin',balance:99999,bets:[]},
-            {username:'Astr0n',password:'X7r!2pQa',role:'admin',balance:99999,bets:[]},
-            {username:'V0rt3x',password:'M9z_3kLw',role:'admin',balance:99999,bets:[]},
-            {username:'N3bulous',password:'R4s^8tUe',role:'admin',balance:99999,bets:[]}
+    async function loadData() {
+        const [usersSnap, matchesSnap] = await Promise.all([
+            db.ref('users').once('value'),
+            db.ref('matches').once('value')
+        ]);
+        users = usersSnap.val() ? Object.values(usersSnap.val()) : [];
+        matches = matchesSnap.val() ? Object.values(matchesSnap.val()) : [];
+        // гарантируем, что у каждого пользователя есть bets
+        users.forEach(u => u.bets = u.bets || []);
+        ensureAdmins();
+    }
+    function ensureAdmins() {
+        const admins = [
+            { username: 'admin', password: 'admin123', role: 'admin', balance: 99999, bets: [] },
+            { username: 'Astr0n', password: 'X7r!2pQa', role: 'admin', balance: 99999, bets: [] },
+            { username: 'V0rt3x', password: 'M9z_3kLw', role: 'admin', balance: 99999, bets: [] },
+            { username: 'N3bulous', password: 'R4s^8tUe', role: 'admin', balance: 99999, bets: [] }
         ];
-        let updated=false;
-        admins.forEach(a=>{ if(!users.find(u=>u.username===a.username)){ users.push(a); updated=true; } });
-        if(updated) await saveUsers();
+        let updated = false;
+        admins.forEach(a => { if (!users.find(u => u.username === a.username)) { users.push({...a, bets: a.bets || []}); updated = true; } });
+        if (updated) saveUsers();
     }
-    async function loadMatches(){
-        const snap=await db.ref('matches').once('value');
-        matches = snap.val() ? Object.values(snap.val()) : [];
-    }
-    async function saveUsers(){
-        const obj={}; users.forEach((u,i)=>obj[i]=u);
+    async function saveUsers() {
+        const obj = {}; users.forEach((u, i) => obj[i] = u);
         await db.ref('users').set(obj);
     }
-    async function saveMatches(){
-        const obj={}; matches.forEach((m,i)=>obj[i]=m);
+    async function saveMatches() {
+        const obj = {}; matches.forEach((m, i) => obj[i] = m);
         await db.ref('matches').set(obj);
     }
-    function getCurrentUser(){ return users.find(u=>u.username===currentUsername); }
-    async function updateBalance(amount){
-        const user=getCurrentUser();
-        if(user){ user.balance=amount; await saveUsers(); }
-    }
+    function getCurrentUser() { return users.find(u => u.username === currentUsername); }
 
-    const welcomeScreen=document.getElementById('welcomeScreen'),
-          authBlock=document.getElementById('authBlock'),
-          mainInterface=document.getElementById('mainInterface'),
-          tabContent=document.getElementById('tabContent'),
-          bottomNav=document.getElementById('bottomNav'),
-          adminBottomNav=document.getElementById('adminBottomNav'),
-          headerRight=document.getElementById('headerRight');
+    const els = {
+        welcome: document.getElementById('welcomeScreen'),
+        auth: document.getElementById('authBlock'),
+        main: document.getElementById('mainInterface'),
+        tab: document.getElementById('tabContent'),
+        bottomNav: document.getElementById('bottomNav'),
+        adminNav: document.getElementById('adminBottomNav'),
+        headerRight: document.getElementById('headerRight')
+    };
 
-    function showWelcome(){
-        welcomeScreen.classList.remove('hidden'); authBlock.classList.add('hidden'); mainInterface.classList.add('hidden');
-        bottomNav.classList.add('hidden'); adminBottomNav.classList.add('hidden');
+    function showWelcome() {
+        els.welcome.classList.remove('hidden');
+        els.auth.classList.add('hidden'); els.main.classList.add('hidden');
+        els.bottomNav.classList.add('hidden'); els.adminNav.classList.add('hidden');
     }
-    function showAuth(){
-        welcomeScreen.classList.add('hidden'); authBlock.classList.remove('hidden'); mainInterface.classList.add('hidden');
-        bottomNav.classList.add('hidden'); adminBottomNav.classList.add('hidden');
+    function showAuth() {
+        els.welcome.classList.add('hidden');
+        els.auth.classList.remove('hidden'); els.main.classList.add('hidden');
+        els.bottomNav.classList.add('hidden'); els.adminNav.classList.add('hidden');
         document.getElementById('loginForm').classList.remove('hidden');
         document.getElementById('registerForm').classList.add('hidden');
     }
-    async function logout(){
-        sessionStorage.removeItem('tonbet_current'); currentUsername=null; headerRight.innerHTML=''; showAuth();
+    async function logout() {
+        sessionStorage.removeItem('tonbet_current');
+        currentUsername = null; els.headerRight.innerHTML = ''; showAuth();
     }
-    async function showMain(){
-        welcomeScreen.classList.add('hidden'); authBlock.classList.add('hidden'); mainInterface.classList.remove('hidden');
-        const user=getCurrentUser(); headerRight.innerHTML='';
-        if(user && user.role==='admin'){
-            bottomNav.classList.add('hidden'); adminBottomNav.classList.remove('hidden');
-            currentTab='adminManage';
-            document.querySelectorAll('#adminBottomNav .nav-item').forEach(i=>i.classList.remove('active'));
+    async function showMain() {
+        els.welcome.classList.add('hidden'); els.auth.classList.add('hidden');
+        els.main.classList.remove('hidden');
+        const user = getCurrentUser();
+        els.headerRight.innerHTML = '';
+        if (user && user.role === 'admin') {
+            els.bottomNav.classList.add('hidden'); els.adminNav.classList.remove('hidden');
+            currentTab = 'adminManage';
+            document.querySelectorAll('#adminBottomNav .nav-item').forEach(i => i.classList.remove('active'));
             document.querySelector('#adminBottomNav .nav-item[data-tab="adminManage"]').classList.add('active');
-            const btn=document.createElement('button'); btn.className='logout-header-btn'; btn.textContent='Выйти';
-            btn.addEventListener('click',logout); headerRight.appendChild(btn);
-        }else{
-            bottomNav.classList.remove('hidden'); adminBottomNav.classList.add('hidden');
-            currentTab='matches';
-            document.querySelectorAll('#bottomNav .nav-item').forEach(i=>i.classList.remove('active'));
+            const btn = document.createElement('button'); btn.className = 'logout-btn'; btn.textContent = 'Выйти';
+            btn.onclick = logout; els.headerRight.appendChild(btn);
+        } else {
+            els.bottomNav.classList.remove('hidden'); els.adminNav.classList.add('hidden');
+            currentTab = 'matches';
+            document.querySelectorAll('#bottomNav .nav-item').forEach(i => i.classList.remove('active'));
             document.querySelector('#bottomNav .nav-item[data-tab="matches"]').classList.add('active');
         }
-        renderTab(currentTab); checkPendingBets();
+        renderTab(currentTab);
+        checkPendingBets();
     }
 
-    document.getElementById('continueBtn').addEventListener('click',async()=>{
-        if(currentUsername && users.some(u=>u.username===currentUsername)) await showMain();
+    document.getElementById('continueBtn').onclick = () => {
+        if (currentUsername && users.some(u => u.username === currentUsername)) showMain();
         else showAuth();
-    });
-    document.getElementById('showRegisterLink').addEventListener('click',e=>{ e.preventDefault();
-        document.getElementById('loginForm').classList.add('hidden'); document.getElementById('registerForm').classList.remove('hidden'); });
-    document.getElementById('showLoginLink').addEventListener('click',e=>{ e.preventDefault();
-        document.getElementById('registerForm').classList.add('hidden'); document.getElementById('loginForm').classList.remove('hidden'); });
-    document.getElementById('loginBtn').addEventListener('click',async()=>{
-        const u=document.getElementById('loginUsername').value.trim(), p=document.getElementById('loginPassword').value;
-        const err=document.getElementById('loginError');
-        if(!u||!p) return err.textContent='Заполните все поля';
-        const user=users.find(x=>x.username===u && x.password===p);
-        if(!user) return err.textContent='Неверный ник или пароль';
-        currentUsername=u; sessionStorage.setItem('tonbet_current',currentUsername);
-        document.getElementById('loginUsername').value=''; document.getElementById('loginPassword').value='';
-        await showMain();
-    });
-    document.getElementById('registerBtn').addEventListener('click',async()=>{
-        const u=document.getElementById('regUsername').value.trim(), p=document.getElementById('regPassword').value,
-              pc=document.getElementById('regConfirmPassword').value, err=document.getElementById('regError');
-        if(!u||!p||!pc) return err.textContent='Заполните все поля';
-        if(p!==pc) return err.textContent='Пароли не совпадают';
-        if(users.some(x=>x.username===u)) return err.textContent='Ник занят';
-        users.push({username:u,password:p,balance:1000,bets:[],role:'user'});
+    };
+    document.getElementById('showRegisterLink').onclick = e => {
+        e.preventDefault();
+        document.getElementById('loginForm').classList.add('hidden');
+        document.getElementById('registerForm').classList.remove('hidden');
+    };
+    document.getElementById('showLoginLink').onclick = e => {
+        e.preventDefault();
+        document.getElementById('registerForm').classList.add('hidden');
+        document.getElementById('loginForm').classList.remove('hidden');
+    };
+    document.getElementById('loginBtn').onclick = async () => {
+        const u = document.getElementById('loginUsername').value.trim();
+        const p = document.getElementById('loginPassword').value;
+        if (!u || !p) return document.getElementById('loginError').textContent = 'Заполните все поля';
+        const user = users.find(x => x.username === u && x.password === p);
+        if (!user) return document.getElementById('loginError').textContent = 'Неверный ник или пароль';
+        currentUsername = u; sessionStorage.setItem('tonbet_current', u);
+        document.getElementById('loginUsername').value = ''; document.getElementById('loginPassword').value = '';
+        showMain();
+    };
+    document.getElementById('registerBtn').onclick = async () => {
+        const u = document.getElementById('regUsername').value.trim();
+        const p = document.getElementById('regPassword').value;
+        const pc = document.getElementById('regConfirmPassword').value;
+        if (!u || !p || !pc) return document.getElementById('regError').textContent = 'Заполните все поля';
+        if (p !== pc) return document.getElementById('regError').textContent = 'Пароли не совпадают';
+        if (users.some(x => x.username === u)) return document.getElementById('regError').textContent = 'Ник занят';
+        users.push({ username: u, password: p, balance: 1000, bets: [], role: 'user' });
         await saveUsers();
         alert('Регистрация успешна!');
-        document.getElementById('regUsername').value=''; document.getElementById('regPassword').value='';
-        document.getElementById('regConfirmPassword').value='';
-        document.getElementById('registerForm').classList.add('hidden'); document.getElementById('loginForm').classList.remove('hidden');
+        document.getElementById('regUsername').value = ''; document.getElementById('regPassword').value = '';
+        document.getElementById('regConfirmPassword').value = '';
+        document.getElementById('registerForm').classList.add('hidden');
+        document.getElementById('loginForm').classList.remove('hidden');
+    };
+
+    document.querySelectorAll('#bottomNav .nav-item').forEach(item => item.onclick = () => {
+        document.querySelectorAll('#bottomNav .nav-item').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        currentTab = item.dataset.tab; currentFilter = 'all';
+        renderTab(currentTab);
+    });
+    document.querySelectorAll('#adminBottomNav .nav-item').forEach(item => item.onclick = () => {
+        document.querySelectorAll('#adminBottomNav .nav-item').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        currentTab = item.dataset.tab;
+        renderTab(currentTab);
     });
 
-    document.querySelectorAll('#bottomNav .nav-item').forEach(item=>{
-        item.addEventListener('click',function(){
-            document.querySelectorAll('#bottomNav .nav-item').forEach(i=>i.classList.remove('active'));
-            this.classList.add('active'); currentTab=this.dataset.tab; currentFilter='all'; renderTab(currentTab);
-        });
-    });
-    document.querySelectorAll('#adminBottomNav .nav-item').forEach(item=>{
-        item.addEventListener('click',function(){
-            document.querySelectorAll('#adminBottomNav .nav-item').forEach(i=>i.classList.remove('active'));
-            this.classList.add('active'); currentTab=this.dataset.tab; renderTab(currentTab);
-        });
-    });
-
-    function renderTab(tab){
-        tabContent.innerHTML='';
-        const user=getCurrentUser();
-        if(user && user.role==='admin'){
-            if(tab==='adminManage') renderAdminManage();
-            else if(tab==='adminAdd') renderAdminAdd();
-            else if(tab==='adminResults') renderAdminResults();
-        }else{
-            if(tab==='matches') renderMatches();
-            else if(tab==='express') renderExpress();
-            else if(tab==='mybets') renderMyBets();
-            else if(tab==='profile') renderProfile();
-            else if(tab==='news') renderNews();
-            else if(tab==='leaderboard') renderLeaderboard();
+    function renderTab(tab) {
+        els.tab.innerHTML = '';
+        const user = getCurrentUser();
+        if (user && user.role === 'admin') {
+            if (tab === 'adminManage') renderAdminManage();
+            else if (tab === 'adminAdd') renderAdminAdd();
+            else if (tab === 'adminResults') renderAdminResults();
+        } else {
+            if (tab === 'matches') renderMatches();
+            else if (tab === 'express') renderExpress();
+            else if (tab === 'mybets') renderMyBets();
+            else if (tab === 'profile') renderProfile();
+            else if (tab === 'news') renderNews();
+            else if (tab === 'leaderboard') renderLeaderboard();
         }
     }
 
-    let expressState={step:'divisions',selectedMatchIds:[],division:null,outcomes:{},totalOdds:0};
-    function renderExpress(){
-        if(expressState.step==='divisions') renderExpressDivisions();
-        else if(expressState.step==='matches') renderExpressMatches();
-        else if(expressState.step==='outcomes') renderExpressOutcomes();
-        else if(expressState.step==='bet') renderExpressBet();
-    }
-    function renderExpressDivisions(){
-        tabContent.innerHTML=`<div class="section-title">Экспресс — Выберите дивизион</div><div class="division-grid" id="expressDivisionGrid"></div>`;
-        const grid=document.getElementById('expressDivisionGrid');
-        DIVISIONS.forEach(div=>{
-            const card=document.createElement('div'); card.className='division-card'; card.textContent=div;
-            card.addEventListener('click',()=>{ expressState.division=div; expressState.step='matches'; renderExpress(); });
-            grid.appendChild(card);
-        });
-    }
-    function renderExpressMatches(){
-        const div=expressState.division;
-        const openMatches=matches.filter(m=>m.division===div && m.status==='open');
-        let html=`<div class="back-link" id="backToDivisions">← Назад к дивизионам</div><div class="section-title">Экспресс — ${div}</div><div class="match-list" id="expressMatchList"></div><button class="action-btn" id="expressReadyBtn" disabled>Готово (выбрано 0)</button>`;
-        tabContent.innerHTML=html;
-        document.getElementById('backToDivisions').addEventListener('click',()=>{ expressState.step='divisions'; expressState.division=null; renderExpress(); });
-        const list=document.getElementById('expressMatchList');
-        if(openMatches.length===0) list.innerHTML='<div style="color:#aaa; text-align:center; padding:20px;">Нет доступных матчей</div>';
-        else{
-            list.innerHTML=openMatches.map(m=>`
-                <div class="match-item ${expressState.selectedMatchIds.includes(m.id)?'selected':''}" data-match-id="${m.id}">
-                    <span>${m.team1} — ${m.team2}</span>
-                    <div class="check-icon">${expressState.selectedMatchIds.includes(m.id)?'✓':''}</div>
-                </div>`).join('');
-            list.querySelectorAll('.match-item').forEach(item=>{
-                item.addEventListener('click',function(){
-                    const id=this.dataset.matchId;
-                    if(expressState.selectedMatchIds.includes(id)) expressState.selectedMatchIds=expressState.selectedMatchIds.filter(x=>x!==id);
-                    else expressState.selectedMatchIds.push(id);
-                    renderExpressMatches();
-                });
+    // ---------- ЭКСПРЕСС ----------
+    let expressState = { step:'divisions', sel:[], div:null, outcomes:{}, totalOdds:0 };
+    function renderExpress() {
+        if (expressState.step === 'divisions') {
+            els.tab.innerHTML = `<div class="section-title">Экспресс — Выберите дивизион</div><div class="division-grid"></div>`;
+            const grid = els.tab.querySelector('.division-grid');
+            DIVISIONS.forEach(d => { const c = document.createElement('div'); c.className = 'division-card'; c.textContent = d; c.onclick = () => { expressState.div = d; expressState.step = 'matches'; renderExpress(); }; grid.appendChild(c); });
+        } else if (expressState.step === 'matches') {
+            const open = matches.filter(m => m.division === expressState.div && m.status === 'open');
+            els.tab.innerHTML = `<div class="back-link">← Назад</div><div class="section-title">Экспресс – ${expressState.div}</div><div class="match-list"></div><button class="action-btn" id="readyBtn" disabled>Готово (0)</button>`;
+            els.tab.querySelector('.back-link').onclick = () => { expressState.step = 'divisions'; renderExpress(); };
+            const list = els.tab.querySelector('.match-list');
+            if (open.length === 0) list.innerHTML = '<div style="color:#aaa;text-align:center;padding:20px;">Нет матчей</div>';
+            else open.forEach(m => {
+                const d = document.createElement('div'); d.className = `match-item ${expressState.sel.includes(m.id) ? 'selected' : ''}`; d.dataset.id = m.id;
+                d.innerHTML = `<span>${m.team1} — ${m.team2}</span><div class="check-icon">${expressState.sel.includes(m.id) ? '✓' : ''}</div>`;
+                d.onclick = () => { if (expressState.sel.includes(m.id)) expressState.sel = expressState.sel.filter(x => x !== m.id); else expressState.sel.push(m.id); renderExpress(); };
+                list.appendChild(d);
             });
-        }
-        const btn=document.getElementById('expressReadyBtn');
-        btn.textContent=`Готово (выбрано ${expressState.selectedMatchIds.length})`;
-        btn.disabled=expressState.selectedMatchIds.length<2;
-        btn.addEventListener('click',()=>{ if(expressState.selectedMatchIds.length>=2){ expressState.step='outcomes'; expressState.outcomes={}; renderExpress(); } });
-    }
-    function renderExpressOutcomes(){
-        const selectedMatches=expressState.selectedMatchIds.map(id=>matches.find(m=>m.id===id)).filter(m=>m);
-        const currentIndex=Object.keys(expressState.outcomes).length;
-        if(currentIndex>=selectedMatches.length){
-            let totalOdds=1;
-            selectedMatches.forEach(m=>{ const outcome=expressState.outcomes[m.id]; let odds=outcome==='TB'?m.odds_TB:outcome==='TM'?m.odds_TM:outcome==='OZ'?m.odds_OZ:m.odds[outcome]; totalOdds*=odds; });
-            expressState.totalOdds=+totalOdds.toFixed(2); expressState.step='bet'; renderExpress(); return;
-        }
-        const match=selectedMatches[currentIndex];
-        tabContent.innerHTML=`<div class="back-link" id="backToMatches">← Назад к выбору матчей</div>
-            <div class="section-title">Выбор исхода ${currentIndex+1}/${selectedMatches.length}</div>
-            <div style="font-size:1.5rem; text-align:center; margin:20px 0;">${match.team1} — ${match.team2}</div>
-            <div class="odds-row" id="expressOddsRow">
-                <div class="odd-block" data-outcome="1"><div>П1</div><div class="odd-value">${match.odds['1'].toFixed(2)}</div></div>
-                <div class="odd-block" data-outcome="X"><div>Ничья</div><div class="odd-value">${match.odds['X'].toFixed(2)}</div></div>
-                <div class="odd-block" data-outcome="2"><div>П2</div><div class="odd-value">${match.odds['2'].toFixed(2)}</div></div>
-                <div class="odd-block" data-outcome="TB"><div>ТБ 2.5</div><div class="odd-value">${match.odds_TB.toFixed(2)}</div></div>
-                <div class="odd-block" data-outcome="TM"><div>ТМ 2.5</div><div class="odd-value">${match.odds_TM.toFixed(2)}</div></div>
-                <div class="odd-block" data-outcome="OZ"><div>ОЗ</div><div class="odd-value">${match.odds_OZ.toFixed(2)}</div></div>
-            </div>`;
-        document.getElementById('backToMatches').addEventListener('click',()=>{ expressState.step='matches'; renderExpress(); });
-        document.querySelectorAll('.odd-block').forEach(block=>{
-            block.addEventListener('click',function(){ expressState.outcomes[match.id]=this.dataset.outcome; renderExpressOutcomes(); });
-        });
-    }
-    function renderExpressBet(){
-        tabContent.innerHTML=`<div class="back-link" id="backToOutcomes">← Изменить исходы</div>
-            <div class="section-title">Итоговый коэффициент: ${expressState.totalOdds.toFixed(2)}</div>
-            <div style="display:flex; gap:10px; align-items:center; margin-top:20px;">
-                <input type="number" class="bet-amount-input" id="expressBetAmount" placeholder="Сумма" min="1">
-                <button class="action-btn" id="placeExpressBetBtn">Сделать ставку</button>
-            </div>`;
-        document.getElementById('backToOutcomes').addEventListener('click',()=>{ expressState.step='outcomes'; expressState.outcomes={}; renderExpress(); });
-        document.getElementById('placeExpressBetBtn').addEventListener('click',async()=>{
-            const user=getCurrentUser(); if(!user) return;
-            const amount=parseFloat(document.getElementById('expressBetAmount').value);
-            if(isNaN(amount)||amount<=0) return alert('Некорректная сумма');
-            if(amount>user.balance) return alert('Недостаточно средств');
-            const legs=expressState.selectedMatchIds.map(id=>{ const m=matches.find(x=>x.id===id); const outcome=expressState.outcomes[id]; let odds=outcome==='TB'?m.odds_TB:outcome==='TM'?m.odds_TM:outcome==='OZ'?m.odds_OZ:m.odds[outcome]; return {matchId:id,team1:m.team1,team2:m.team2,outcome,odds}; });
-            await updateBalance(user.balance-amount);
-            user.bets.push({type:'express',legs,totalOdds:expressState.totalOdds,amount,status:'pending',winAmount:0});
-            await saveUsers();
-            alert('Ставка принята!');
-            expressState={step:'divisions',selectedMatchIds:[],division:null,outcomes:{},totalOdds:0};
-            renderTab('express');
-        });
-    }
-
-    let matchesState={view:'divisions',division:null,match:null};
-    function renderMatches(){
-        const container=tabContent;
-        if(matchesState.view==='divisions'){
-            container.innerHTML=`<div class="section-title">Выберите дивизион</div><div class="division-grid" id="divisionGrid"></div>`;
-            const grid=document.getElementById('divisionGrid');
-            DIVISIONS.forEach(div=>{
-                const card=document.createElement('div'); card.className='division-card'; card.textContent=div;
-                card.addEventListener('click',()=>{ matchesState.view='matches'; matchesState.division=div; renderMatches(); });
-                grid.appendChild(card);
-            });
-        }else if(matchesState.view==='matches'){
-            const div=matchesState.division;
-            const divisionMatches=matches.filter(m=>m.division===div && m.status==='open');
-            container.innerHTML=`<div class="back-link" id="backToDivisions">← Назад</div><div class="section-title">${div}</div><div class="match-list" id="matchList"></div>`;
-            document.getElementById('backToDivisions').addEventListener('click',()=>{ matchesState.view='divisions'; matchesState.division=null; renderMatches(); });
-            const list=document.getElementById('matchList');
-            if(divisionMatches.length===0) list.innerHTML='<div style="color:#aaa; text-align:center; padding:20px;">Нет матчей</div>';
-            else divisionMatches.forEach(m=>{
-                const item=document.createElement('div'); item.className='match-item';
-                item.innerHTML=`<span>${m.team1} — ${m.team2}</span><span style="color:#aaa;">Ставка</span>`;
-                item.addEventListener('click',()=>{ matchesState.view='bet'; matchesState.match=m; renderMatches(); });
-                list.appendChild(item);
-            });
-        }else if(matchesState.view==='bet'){
-            const m=matchesState.match;
-            container.innerHTML=`<div class="back-link" id="backToMatches">← К матчам</div>
-                <div class="bet-detail">
-                    <div style="font-size:1.5rem; text-align:center; margin-bottom:15px;">${m.team1} — ${m.team2}</div>
-                    <div class="odds-row" id="oddsRow">
-                        <div class="odd-block" data-outcome="1"><div>П1</div><div class="odd-value">${m.odds['1'].toFixed(2)}</div></div>
-                        <div class="odd-block" data-outcome="X"><div>Ничья</div><div class="odd-value">${m.odds['X'].toFixed(2)}</div></div>
-                        <div class="odd-block" data-outcome="2"><div>П2</div><div class="odd-value">${m.odds['2'].toFixed(2)}</div></div>
-                        <div class="odd-block" data-outcome="TB"><div>ТБ 2.5</div><div class="odd-value">${m.odds_TB.toFixed(2)}</div></div>
-                        <div class="odd-block" data-outcome="TM"><div>ТМ 2.5</div><div class="odd-value">${m.odds_TM.toFixed(2)}</div></div>
-                        <div class="odd-block" data-outcome="OZ"><div>ОЗ</div><div class="odd-value">${m.odds_OZ.toFixed(2)}</div></div>
-                    </div>
-                    ${m.status==='open'?`
-                        <div style="display:flex; gap:10px; align-items:center; margin-top:20px;">
-                            <input type="number" class="bet-amount-input" id="betAmount" placeholder="Сумма" min="1">
-                            <button class="action-btn" id="placeBetBtn">Ставка</button>
-                        </div>`:`<div style="margin-top:20px; color:#ffaa00;">Приём ставок закрыт</div>`}
+            const btn = els.tab.querySelector('#readyBtn');
+            btn.textContent = `Готово (выбрано ${expressState.sel.length})`;
+            btn.disabled = expressState.sel.length < 2;
+            btn.onclick = () => { if (expressState.sel.length >= 2) { expressState.step = 'outcomes'; expressState.outcomes = {}; renderExpress(); } };
+        } else if (expressState.step === 'outcomes') {
+            const selMatches = expressState.sel.map(id => matches.find(m => m.id === id)).filter(m => m);
+            const idx = Object.keys(expressState.outcomes).length;
+            if (idx >= selMatches.length) {
+                let tot = 1; selMatches.forEach(m => { const out = expressState.outcomes[m.id]; let o = out === 'TB' ? m.odds_TB : out === 'TM' ? m.odds_TM : out === 'OZ' ? m.odds_OZ : m.odds[out]; tot *= o; });
+                expressState.totalOdds = +tot.toFixed(2); expressState.step = 'bet'; renderExpress(); return;
+            }
+            const m = selMatches[idx];
+            els.tab.innerHTML = `<div class="back-link">← Назад</div><div class="section-title">Исход ${idx+1}/${selMatches.length}</div>
+                <div style="font-size:1.5rem;text-align:center;margin:20px 0;">${m.team1} — ${m.team2}</div>
+                <div class="odds-row">
+                    <div class="odd-block" data-out="1"><div>П1</div><div class="odd-value">${m.odds['1'].toFixed(2)}</div></div>
+                    <div class="odd-block" data-out="X"><div>Ничья</div><div class="odd-value">${m.odds['X'].toFixed(2)}</div></div>
+                    <div class="odd-block" data-out="2"><div>П2</div><div class="odd-value">${m.odds['2'].toFixed(2)}</div></div>
+                    <div class="odd-block" data-out="TB"><div>ТБ 2.5</div><div class="odd-value">${m.odds_TB.toFixed(2)}</div></div>
+                    <div class="odd-block" data-out="TM"><div>ТМ 2.5</div><div class="odd-value">${m.odds_TM.toFixed(2)}</div></div>
+                    <div class="odd-block" data-out="OZ"><div>ОЗ</div><div class="odd-value">${m.odds_OZ.toFixed(2)}</div></div>
                 </div>`;
-            document.getElementById('backToMatches').addEventListener('click',()=>{ matchesState.view='matches'; matchesState.match=null; renderMatches(); });
-            if(m.status==='open'){
-                let selectedOutcome=null;
-                document.querySelectorAll('.odd-block').forEach(block=>{
-                    block.addEventListener('click',function(){
-                        document.querySelectorAll('.odd-block').forEach(b=>b.classList.remove('selected'));
-                        this.classList.add('selected'); selectedOutcome=this.dataset.outcome;
-                    });
+            els.tab.querySelector('.back-link').onclick = () => { expressState.step = 'matches'; renderExpress(); };
+            els.tab.querySelectorAll('.odd-block').forEach(b => b.onclick = () => { expressState.outcomes[m.id] = b.dataset.out; renderExpress(); });
+        } else if (expressState.step === 'bet') {
+            els.tab.innerHTML = `<div class="back-link">← Изменить исходы</div><div class="section-title">Коэффициент: ${expressState.totalOdds.toFixed(2)}</div>
+                <div style="display:flex;gap:10px;align-items:center;margin-top:20px;">
+                    <input type="number" class="bet-amount-input" id="expAmount" placeholder="Сумма" min="1">
+                    <button class="action-btn" id="placeExpBet">Сделать ставку</button>
+                </div>`;
+            els.tab.querySelector('.back-link').onclick = () => { expressState.step = 'outcomes'; expressState.outcomes = {}; renderExpress(); };
+            els.tab.querySelector('#placeExpBet').onclick = async () => {
+                const user = getCurrentUser(); if (!user) return;
+                const amount = +els.tab.querySelector('#expAmount').value;
+                if (isNaN(amount) || amount <= 0) return alert('Некорректная сумма');
+                if (amount > user.balance) return alert('Недостаточно средств');
+                const legs = expressState.sel.map(id => { const m = matches.find(x => x.id === id); const out = expressState.outcomes[id]; let odds = out === 'TB' ? m.odds_TB : out === 'TM' ? m.odds_TM : out === 'OZ' ? m.odds_OZ : m.odds[out]; return { matchId: id, team1: m.team1, team2: m.team2, outcome: out, odds }; });
+                user.balance -= amount; user.bets.push({ type: 'express', legs, totalOdds: expressState.totalOdds, amount, status: 'pending', winAmount: 0 });
+                await saveUsers();
+                alert('Ставка принята!');
+                expressState = { step:'divisions', sel:[], div:null, outcomes:{}, totalOdds:0 };
+                renderTab('express');
+            };
+        }
+    }
+
+    // ---------- МАТЧИ ----------
+    let matchState = { view:'divisions', div:null, match:null };
+    function renderMatches() {
+        if (matchState.view === 'divisions') {
+            els.tab.innerHTML = `<div class="section-title">Выберите дивизион</div><div class="division-grid"></div>`;
+            const grid = els.tab.querySelector('.division-grid');
+            DIVISIONS.forEach(d => { const c = document.createElement('div'); c.className = 'division-card'; c.textContent = d; c.onclick = () => { matchState.div = d; matchState.view = 'matches'; renderMatches(); }; grid.appendChild(c); });
+        } else if (matchState.view === 'matches') {
+            const list = matches.filter(m => m.division === matchState.div && m.status === 'open');
+            els.tab.innerHTML = `<div class="back-link">← Назад</div><div class="section-title">${matchState.div}</div><div class="match-list"></div>`;
+            els.tab.querySelector('.back-link').onclick = () => { matchState.view = 'divisions'; renderMatches(); };
+            const ml = els.tab.querySelector('.match-list');
+            if (list.length === 0) ml.innerHTML = '<div style="color:#aaa;text-align:center;padding:20px;">Нет матчей</div>';
+            else list.forEach(m => {
+                const d = document.createElement('div'); d.className = 'match-item';
+                d.innerHTML = `<span>${m.team1} — ${m.team2}</span><span style="color:#aaa;">Ставка</span>`;
+                d.onclick = () => { matchState.match = m; matchState.view = 'bet'; renderMatches(); };
+                ml.appendChild(d);
+            });
+        } else if (matchState.view === 'bet') {
+            const m = matchState.match;
+            els.tab.innerHTML = `<div class="back-link">← К матчам</div><div class="bet-detail">
+                <div style="font-size:1.5rem;text-align:center;margin-bottom:15px;">${m.team1} — ${m.team2}</div>
+                <div class="odds-row">
+                    <div class="odd-block" data-out="1"><div>П1</div><div class="odd-value">${m.odds['1'].toFixed(2)}</div></div>
+                    <div class="odd-block" data-out="X"><div>Ничья</div><div class="odd-value">${m.odds['X'].toFixed(2)}</div></div>
+                    <div class="odd-block" data-out="2"><div>П2</div><div class="odd-value">${m.odds['2'].toFixed(2)}</div></div>
+                    <div class="odd-block" data-out="TB"><div>ТБ 2.5</div><div class="odd-value">${m.odds_TB.toFixed(2)}</div></div>
+                    <div class="odd-block" data-out="TM"><div>ТМ 2.5</div><div class="odd-value">${m.odds_TM.toFixed(2)}</div></div>
+                    <div class="odd-block" data-out="OZ"><div>ОЗ</div><div class="odd-value">${m.odds_OZ.toFixed(2)}</div></div>
+                </div>
+                ${m.status === 'open' ? `<div style="display:flex;gap:10px;align-items:center;margin-top:20px;">
+                    <input type="number" class="bet-amount-input" id="betAmount" placeholder="Сумма" min="1">
+                    <button class="action-btn" id="placeBet">Ставка</button>
+                </div>` : `<div style="margin-top:20px;color:#ffaa00;">Приём ставок закрыт</div>`}
+            </div>`;
+            els.tab.querySelector('.back-link').onclick = () => { matchState.view = 'matches'; renderMatches(); };
+            if (m.status === 'open') {
+                let selOut = null;
+                els.tab.querySelectorAll('.odd-block').forEach(b => b.onclick = function() {
+                    els.tab.querySelectorAll('.odd-block').forEach(x => x.classList.remove('selected'));
+                    this.classList.add('selected'); selOut = this.dataset.out;
                 });
-                document.getElementById('placeBetBtn').addEventListener('click',async()=>{
-                    const user=getCurrentUser(); if(!user) return;
-                    if(!selectedOutcome) return alert('Выберите исход');
-                    const amount=parseFloat(document.getElementById('betAmount').value);
-                    if(isNaN(amount)||amount<=0) return alert('Некорректная сумма');
-                    if(amount>user.balance) return alert('Недостаточно средств');
-                    let odds;
-                    if(selectedOutcome==='TB') odds=m.odds_TB;
-                    else if(selectedOutcome==='TM') odds=m.odds_TM;
-                    else if(selectedOutcome==='OZ') odds=m.odds_OZ;
-                    else odds=m.odds[selectedOutcome];
-                    await updateBalance(user.balance-amount);
-                    user.bets.push({type:'single',matchId:m.id,team1:m.team1,team2:m.team2,outcome:selectedOutcome,amount,odds,status:'pending',winAmount:0});
+                els.tab.querySelector('#placeBet').onclick = async () => {
+                    const user = getCurrentUser(); if (!user) return;
+                    if (!selOut) return alert('Выберите исход');
+                    const amount = +els.tab.querySelector('#betAmount').value;
+                    if (isNaN(amount) || amount <= 0) return alert('Некорректная сумма');
+                    if (amount > user.balance) return alert('Недостаточно средств');
+                    let odds = selOut === 'TB' ? m.odds_TB : selOut === 'TM' ? m.odds_TM : selOut === 'OZ' ? m.odds_OZ : m.odds[selOut];
+                    user.balance -= amount;
+                    user.bets.push({ type:'single', matchId:m.id, team1:m.team1, team2:m.team2, outcome:selOut, amount, odds, status:'pending', winAmount:0 });
                     await saveUsers();
                     alert('Ставка принята!');
-                    document.getElementById('betAmount').value='';
-                    document.querySelectorAll('.odd-block').forEach(b=>b.classList.remove('selected'));
-                    selectedOutcome=null;
-                });
+                    document.getElementById('betAmount').value = '';
+                    els.tab.querySelectorAll('.odd-block').forEach(x => x.classList.remove('selected'));
+                    selOut = null;
+                };
             }
         }
     }
 
-    function renderMyBets(){
-        const user=getCurrentUser(); if(!user) return;
-        let bets=user.bets.slice().reverse();
-        if(currentFilter==='pending') bets=bets.filter(b=>b.status==='pending');
-        else if(currentFilter==='win') bets=bets.filter(b=>b.status==='win');
-        else if(currentFilter==='lose') bets=bets.filter(b=>b.status==='lose');
-        let html='<div class="section-title">Мои Ставки</div>';
-        html+=`<div class="filter-tabs">
-            <div class="filter-tab ${currentFilter==='all'?'active':''}" data-filter="all">Все</div>
-            <div class="filter-tab ${currentFilter==='pending'?'active':''}" data-filter="pending">Действующие</div>
-            <div class="filter-tab ${currentFilter==='win'?'active':''}" data-filter="win">Выигрышные</div>
-            <div class="filter-tab ${currentFilter==='lose'?'active':''}" data-filter="lose">Проигрыши</div>
+    // ---------- МОИ СТАВКИ ----------
+    function renderMyBets() {
+        const user = getCurrentUser();
+        if (!user) { els.tab.innerHTML = '<div class="section-title">Войдите заново</div>'; return; }
+        let bets = (user.bets || []).slice().reverse();
+        if (currentFilter === 'pending') bets = bets.filter(b => b.status === 'pending');
+        else if (currentFilter === 'win') bets = bets.filter(b => b.status === 'win');
+        else if (currentFilter === 'lose') bets = bets.filter(b => b.status === 'lose');
+        let html = '<div class="section-title">Мои Ставки</div>';
+        html += `<div class="filter-tabs">
+            <div class="filter-tab ${currentFilter==='all'?'active':''}" data-f="all">Все</div>
+            <div class="filter-tab ${currentFilter==='pending'?'active':''}" data-f="pending">Действующие</div>
+            <div class="filter-tab ${currentFilter==='win'?'active':''}" data-f="win">Выигрышные</div>
+            <div class="filter-tab ${currentFilter==='lose'?'active':''}" data-f="lose">Проигрыши</div>
         </div>`;
-        if(bets.length===0) html+='<div style="color:#aaa; text-align:center; padding:20px;">Нет ставок</div>';
-        else bets.forEach(bet=>{
-            if(bet.type==='express'){
-                const legsText=bet.legs.map(l=>`${l.team1} — ${l.team2} (${l.outcome==='TB'?'ТБ 2.5':l.outcome==='TM'?'ТМ 2.5':l.outcome==='OZ'?'ОЗ':(l.outcome==='1'?'П1':l.outcome==='X'?'Ничья':'П2')}) @${l.odds.toFixed(2)}`).join('<br>');
-                const statusHTML=bet.status==='win'?'<span class="status-win"><svg class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>Выигрыш</span>'
-                    :bet.status==='lose'?'<span class="status-lose"><svg class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>Проигрыш</span>'
-                    :'<span style="color:#aaa">Ожидание</span>';
-                html+=`<div style="background:var(--card-bg); border-radius:16px; padding:14px; margin-bottom:10px;">
+        if (bets.length === 0) html += '<div style="color:#aaa;text-align:center;padding:20px;">Нет ставок</div>';
+        else bets.forEach(bet => {
+            if (bet.type === 'express') {
+                const legs = bet.legs.map(l => `${l.team1} — ${l.team2} (${l.outcome==='TB'?'ТБ 2.5':l.outcome==='TM'?'ТМ 2.5':l.outcome==='OZ'?'ОЗ':(l.outcome==='1'?'П1':l.outcome==='X'?'Ничья':'П2')}) @${l.odds.toFixed(2)}`).join('<br>');
+                const st = bet.status === 'win' ? '<span class="status-win"><svg class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Выигрыш</span>'
+                         : bet.status === 'lose' ? '<span class="status-lose"><svg class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Проигрыш</span>'
+                         : '<span style="color:#aaa">Ожидание</span>';
+                html += `<div style="background:var(--card-bg);border-radius:16px;padding:14px;margin-bottom:10px;">
                     <div><strong>Экспресс</strong> (${bet.legs.length} событий, коэф. ${bet.totalOdds.toFixed(2)})</div>
-                    <div style="font-size:0.9rem; margin:8px 0;">${legsText}</div>
-                    <div style="display:flex; justify-content:space-between;">
-                        <span>Сумма: ${bet.amount.toFixed(2)}</span> ${statusHTML}
-                    </div></div>`;
-            }else{
-                const outcomeText=bet.outcome==='TB'?'ТБ 2.5':bet.outcome==='TM'?'ТМ 2.5':bet.outcome==='OZ'?'ОЗ':(bet.outcome==='1'?'П1':bet.outcome==='X'?'Ничья':'П2');
-                const statusHTML=bet.status==='win'?'<span class="status-win"><svg class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>Выигрыш</span>'
-                    :bet.status==='lose'?'<span class="status-lose"><svg class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>Проигрыш</span>'
-                    :'<span style="color:#aaa">Ожидание</span>';
-                html+=`<div style="background:var(--card-bg); border-radius:16px; padding:14px; margin-bottom:10px;">
-                    <div style="display:flex; justify-content:space-between;">
-                        <strong>${bet.team1} — ${bet.team2}</strong>
-                        <span>${outcomeText} @ ${bet.odds.toFixed(2)}</span>
-                    </div><div style="display:flex; justify-content:space-between; margin-top:6px;">
-                        <span>Сумма: ${bet.amount.toFixed(2)}</span> ${statusHTML}
-                    </div></div>`;
+                    <div style="font-size:0.85rem;margin:8px 0;">${legs}</div>
+                    <div style="display:flex;justify-content:space-between;"><span>Сумма: ${bet.amount.toFixed(2)}</span>${st}</div>
+                </div>`;
+            } else {
+                const out = bet.outcome==='TB'?'ТБ 2.5':bet.outcome==='TM'?'ТМ 2.5':bet.outcome==='OZ'?'ОЗ':(bet.outcome==='1'?'П1':bet.outcome==='X'?'Ничья':'П2');
+                const st = bet.status === 'win' ? '<span class="status-win"><svg class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Выигрыш</span>'
+                         : bet.status === 'lose' ? '<span class="status-lose"><svg class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Проигрыш</span>'
+                         : '<span style="color:#aaa">Ожидание</span>';
+                html += `<div style="background:var(--card-bg);border-radius:16px;padding:14px;margin-bottom:10px;">
+                    <div style="display:flex;justify-content:space-between;"><strong>${bet.team1} — ${bet.team2}</strong><span>${out} @ ${bet.odds.toFixed(2)}</span></div>
+                    <div style="display:flex;justify-content:space-between;margin-top:6px;"><span>Сумма: ${bet.amount.toFixed(2)}</span>${st}</div>
+                </div>`;
             }
         });
-        tabContent.innerHTML=html;
-        document.querySelectorAll('.filter-tab').forEach(tab=>{
-            tab.addEventListener('click',function(){ currentFilter=this.dataset.filter; renderMyBets(); });
-        });
+        els.tab.innerHTML = html;
+        els.tab.querySelectorAll('.filter-tab').forEach(t => t.onclick = () => { currentFilter = t.dataset.f; renderMyBets(); });
     }
 
-    function renderProfile(){
-        const user=getCurrentUser(); if(!user) return;
-        const finished=user.bets.filter(b=>b.status!=='pending');
-        const wins=finished.filter(b=>b.status==='win').length;
-        const winrate=finished.length?((wins/finished.length)*100).toFixed(1):0;
-        tabContent.innerHTML=`
+    // ---------- ПРОФИЛЬ ----------
+    function renderProfile() {
+        const user = getCurrentUser();
+        if (!user) { els.tab.innerHTML = '<div class="section-title">Войдите заново</div>'; return; }
+        const bets = user.bets || [];
+        const fin = bets.filter(b => b.status !== 'pending');
+        const wins = fin.filter(b => b.status === 'win').length;
+        const wr = fin.length ? ((wins / fin.length) * 100).toFixed(1) : 0;
+        els.tab.innerHTML = `
             <div class="section-title">Профиль</div>
             <div class="profile-stat"><span>Ник</span><strong>${user.username}</strong></div>
             <div class="profile-stat"><span>Баланс</span><strong style="color:var(--success);">${user.balance.toFixed(2)}</strong></div>
-            <div class="profile-stat"><span>Ставок</span><strong>${finished.length}</strong></div>
+            <div class="profile-stat"><span>Ставок</span><strong>${fin.length}</strong></div>
             <div class="profile-stat"><span>Выигрышей</span><strong>${wins}</strong></div>
-            <div class="profile-stat"><span>Винрейт</span><strong>${winrate}%</strong></div>
-            <button class="action-btn" id="logoutBtn" style="margin-top:25px;">Выйти</button>`;
-        document.getElementById('logoutBtn').addEventListener('click',logout);
+            <div class="profile-stat"><span>Винрейт</span><strong>${wr}%</strong></div>
+            <button class="action-btn" id="logoutProfileBtn" style="margin-top:20px;">Выйти</button>`;
+        els.tab.querySelector('#logoutProfileBtn').onclick = logout;
     }
 
-    const news=[{title:'СТАРТ ПРОЕКТА',text:'TonBet запущен! Теперь вы можете делать ставки на матчи ФТКЛ, зарабатывать коины и соревноваться с другими игроками.'}];
-    function renderNews(){
-        const totalUsers=users.filter(u=>u.role!=='admin').length;
-        let html='<div class="section-title">Информация</div>';
-        news.forEach((n,idx)=>{
-            html+=`<div class="news-item" data-idx="${idx}">${n.title}</div><div id="newsDetail${idx}" class="hidden news-detail">${n.text}</div>`;
-        });
-        html+=`<div style="margin-top:20px;">
-            <a href="https://t.me/tonboxftcl" target="_blank" class="contact-btn">
-                <svg width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M12,2C6.48,2,2,6.48,2,12s4.48,10,10,10s10-4.48,10-10S17.52,2,12,2z M16.64,8.8c-0.15,1.58-0.8,5.42-1.13,7.19c-0.14,0.75-0.42,1-0.68,1.03c-0.58,0.05-1.02-0.38-1.58-0.75c-0.88-0.58-1.38-0.94-2.23-1.5c-0.99-0.65-0.35-1.01,0.22-1.59c0.15-0.15,2.71-2.48,2.76-2.69c0.01-0.03,0.01-0.14-0.05-0.2c-0.06-0.06-0.16-0.04-0.23-0.02c-0.1,0.02-1.66,1.06-4.68,3.09c-0.44,0.3-0.84,0.45-1.2,0.44c-0.4-0.01-1.16-0.22-1.72-0.41c-0.69-0.23-1.24-0.35-1.19-0.73c0.03-0.2,0.3-0.41,0.83-0.62c3.24-1.41,5.41-2.35,6.5-2.8c3.09-1.29,3.74-1.51,4.16-1.52c0.09,0,0.3,0.02,0.43,0.13c0.11,0.09,0.14,0.22,0.15,0.31C16.66,8.66,16.65,8.74,16.64,8.8z"/></svg>
-                Телеграм Канал</a>
-            <a href="https://t.me/fanziks" target="_blank" class="contact-btn">
-                <svg width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M12,2C6.48,2,2,6.48,2,12s4.48,10,10,10s10-4.48,10-10S17.52,2,12,2z M16.64,8.8c-0.15,1.58-0.8,5.42-1.13,7.19c-0.14,0.75-0.42,1-0.68,1.03c-0.58,0.05-1.02-0.38-1.58-0.75c-0.88-0.58-1.38-0.94-2.23-1.5c-0.99-0.65-0.35-1.01,0.22-1.59c0.15-0.15,2.71-2.48,2.76-2.69c0.01-0.03,0.01-0.14-0.05-0.2c-0.06-0.06-0.16-0.04-0.23-0.02c-0.1,0.02-1.66,1.06-4.68,3.09c-0.44,0.3-0.84,0.45-1.2,0.44c-0.4-0.01-1.16-0.22-1.72-0.41c-0.69-0.23-1.24-0.35-1.19-0.73c0.03-0.2,0.3-0.41,0.83-0.62c3.24-1.41,5.41-2.35,6.5-2.8c3.09-1.29,3.74-1.51,4.16-1.52c0.09,0,0.3,0.02,0.43,0.13c0.11,0.09,0.14,0.22,0.15,0.31C16.66,8.66,16.65,8.74,16.64,8.8z"/></svg>
-                Связаться с создателем</a>
+    // ---------- ИНФО ----------
+    const news = [{ title:'СТАРТ ПРОЕКТА', text:'TonBet запущен! Ставки на ФТКЛ, зарабатывайте коины.' }];
+    function renderNews() {
+        const total = users.filter(u => u.role !== 'admin').length;
+        let html = '<div class="section-title">Информация</div>';
+        news.forEach((n, i) => html += `<div class="news-item" data-idx="${i}">${n.title}</div><div class="news-detail hidden" id="nd${i}">${n.text}</div>`);
+        html += `<div style="margin-top:20px;">
+            <a href="https://t.me/tonboxftcl" target="_blank" class="contact-btn"><svg width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.05-.2-.06-.06-.16-.04-.23-.02-.1.02-1.66 1.06-4.68 3.09-.44.3-.84.45-1.2.44-.4-.01-1.16-.22-1.72-.41-.69-.23-1.24-.35-1.19-.73.03-.2.3-.41.83-.62 3.24-1.41 5.41-2.35 6.5-2.8 3.09-1.29 3.74-1.51 4.16-1.52.09 0 .3.02.43.13.11.09.14.22.15.31-.01.02-.02.1-.03.16z"/></svg>Телеграм Канал</a>
+            <a href="https://t.me/fanziks" target="_blank" class="contact-btn"><svg width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.05-.2-.06-.06-.16-.04-.23-.02-.1.02-1.66 1.06-4.68 3.09-.44.3-.84.45-1.2.44-.4-.01-1.16-.22-1.72-.41-.69-.23-1.24-.35-1.19-.73.03-.2.3-.41.83-.62 3.24-1.41 5.41-2.35 6.5-2.8 3.09-1.29 3.74-1.51 4.16-1.52.09 0 .3.02.43.13.11.09.14.22.15.31-.01.02-.02.1-.03.16z"/></svg>Связаться с создателем</a>
         </div>
-        <div class="user-counter"><div class="counter-title">КОЛ-ВО ЛУДОМАНОВ TONBET</div><div class="counter-number" id="userCounterNumber">${totalUsers}</div></div>`;
-        tabContent.innerHTML=html;
-        document.querySelectorAll('.news-item').forEach(item=>{
-            item.addEventListener('click',function(){
-                const idx=this.dataset.idx;
-                document.getElementById(`newsDetail${idx}`).classList.toggle('hidden');
-            });
-        });
+        <div class="user-counter"><div class="counter-title">КОЛ-ВО ЛУДОМАНОВ TONBET</div><div class="counter-number">${total}</div></div>`;
+        els.tab.innerHTML = html;
+        els.tab.querySelectorAll('.news-item').forEach(n => n.onclick = () => document.getElementById(`nd${n.dataset.idx}`).classList.toggle('hidden'));
     }
 
-    function renderLeaderboard(){
-        const stats=users.filter(u=>u.role!=='admin').map(u=>{
-            let profit=0;
-            u.bets.forEach(b=>{ if(b.status==='win') profit+=b.winAmount-b.amount; else if(b.status==='lose') profit-=b.amount; });
-            return {username:u.username,profit};
-        }).sort((a,b)=>b.profit-a.profit).slice(0,10);
-        let html='<div class="section-title">Топ 10 TonBet</div>';
-        if(stats.length===0) html+='<p style="color:#aaa; padding:20px;">Пока пусто</p>';
-        else{
-            html+='<table class="leaderboard-table"><thead><tr><th>#</th><th>Ник</th><th>Чистый доход</th></tr></thead><tbody>';
-            stats.forEach((s,i)=>html+=`<tr><td>${i+1}</td><td>${s.username}</td><td class="profit-positive">${s.profit>=0?'+':''}${s.profit.toFixed(2)}</td></tr>`);
-            html+='</tbody></table>';
+    // ---------- ТОП 10 ----------
+    function renderLeaderboard() {
+        const stats = users.filter(u => u.role !== 'admin').map(u => {
+            const bets = u.bets || [];
+            let profit = 0;
+            bets.forEach(b => { if (b.status === 'win') profit += b.winAmount - b.amount; else if (b.status === 'lose') profit -= b.amount; });
+            return { username: u.username, profit };
+        }).sort((a, b) => b.profit - a.profit).slice(0, 10);
+        let html = '<div class="section-title">Топ 10 TonBet</div>';
+        if (stats.length === 0) html += '<p style="color:#aaa;text-align:center;padding:20px;">Пока пусто</p>';
+        else {
+            html += '<table class="leaderboard-table"><thead><tr><th>#</th><th>Ник</th><th>Чистый доход</th></tr></thead><tbody>';
+            stats.forEach((s, i) => html += `<tr><td>${i+1}</td><td>${s.username}</td><td class="profit-positive">${s.profit >= 0 ? '+' : ''}${s.profit.toFixed(2)}</td></tr>`);
+            html += '</tbody></table>';
         }
-        tabContent.innerHTML=html;
+        els.tab.innerHTML = html;
     }
 
-    // Админка
-    function renderAdminManage(){
-        let html='<div class="section-title">Управление матчами</div>';
-        if(matches.length===0) html+='<p style="color:#aaa;">Нет матчей</p>';
-        else matches.forEach(m=>{
-            html+=`<div style="background:var(--card-bg); border-radius:18px; padding:15px; margin-bottom:12px;">
+    // ---------- АДМИНКА ----------
+    function renderAdminManage() {
+        let html = '<div class="section-title">Управление матчами</div>';
+        if (matches.length === 0) html += '<p style="color:#aaa;">Нет матчей</p>';
+        else matches.forEach(m => {
+            html += `<div style="background:var(--card-bg);border-radius:18px;padding:15px;margin-bottom:12px;">
                 <strong>${m.team1} — ${m.team2}</strong> (${m.division})<br>
                 Статус: ${m.status==='open'?'Открыт':'Закрыт'}, Счёт: ${m.score?m.score.t1+':'+m.score.t2:'—'}<br>
                 ${m.status==='open'?`<button class="action-btn closeLine" data-id="${m.id}">Закрыть линию</button>`:''}
@@ -621,29 +540,19 @@
                 ${m.status==='closed'&&!m.score?`<button class="action-btn setScoreBtn" data-id="${m.id}">Установить счёт</button>`:''}
             </div>`;
         });
-        tabContent.innerHTML=html;
-        document.querySelectorAll('.closeLine').forEach(btn=>{ btn.addEventListener('click',async()=>{
-            const m=matches.find(x=>x.id===btn.dataset.id); if(m){ m.status='closed'; await saveMatches(); renderTab('adminManage'); }
-        })});
-        document.querySelectorAll('.openLine').forEach(btn=>{ btn.addEventListener('click',async()=>{
-            const m=matches.find(x=>x.id===btn.dataset.id); if(m){ m.status='open'; await saveMatches(); renderTab('adminManage'); }
-        })});
-        document.querySelectorAll('.setScoreBtn').forEach(btn=>{ btn.addEventListener('click',()=>{
-            currentTab='adminResults';
-            document.querySelectorAll('#adminBottomNav .nav-item').forEach(i=>i.classList.remove('active'));
-            document.querySelector('#adminBottomNav .nav-item[data-tab="adminResults"]').classList.add('active');
-            renderAdminResults(btn.dataset.id);
-        })});
+        els.tab.innerHTML = html;
+        els.tab.querySelectorAll('.closeLine').forEach(b => b.onclick = async () => { const m = matches.find(x => x.id === b.dataset.id); if (m) { m.status = 'closed'; await saveMatches(); renderTab('adminManage'); } });
+        els.tab.querySelectorAll('.openLine').forEach(b => b.onclick = async () => { const m = matches.find(x => x.id === b.dataset.id); if (m) { m.status = 'open'; await saveMatches(); renderTab('adminManage'); } });
+        els.tab.querySelectorAll('.setScoreBtn').forEach(b => b.onclick = () => { currentTab = 'adminResults'; document.querySelectorAll('#adminBottomNav .nav-item').forEach(i => i.classList.remove('active')); document.querySelector('#adminBottomNav .nav-item[data-tab="adminResults"]').classList.add('active'); renderAdminResults(b.dataset.id); });
     }
 
-    function renderAdminAdd(){
-        tabContent.innerHTML=`
-            <div class="section-title">Добавить матч</div>
-            <div class="input-group"><label>Дивизион</label><select id="newDivision">${DIVISIONS.map(d=>`<option>${d}</option>`).join('')}</select></div>
+    function renderAdminAdd() {
+        els.tab.innerHTML = `<div class="section-title">Добавить матч</div>
+            <div class="input-group"><label>Дивизион</label><select id="newDiv">${DIVISIONS.map(d => `<option>${d}</option>`).join('')}</select></div>
             <div class="input-group"><label>Команда 1</label><input type="text" id="newTeam1" placeholder="Название"></div>
             <div class="input-group"><label>Команда 2</label><input type="text" id="newTeam2" placeholder="Название"></div>
-            <div id="calculatedOdds" style="margin:15px 0; display:none;">
-                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <div id="calcOdds" style="display:none;margin:15px 0;">
+                <div class="odds-row">
                     <div class="odd-block"><div>П1</div><div class="odd-value" id="odd1">—</div></div>
                     <div class="odd-block"><div>Ничья</div><div class="odd-value" id="oddX">—</div></div>
                     <div class="odd-block"><div>П2</div><div class="odd-value" id="odd2">—</div></div>
@@ -652,200 +561,185 @@
                     <div class="odd-block"><div>ОЗ</div><div class="odd-value" id="oddOZ">—</div></div>
                 </div>
             </div>
-            <button class="action-btn" id="calcOddsBtn">Рассчитать коэффициенты</button>
-            <button class="action-btn" id="addMatchBtn" style="display:none; margin-top:10px;">Добавить матч</button>`;
-        let calculatedOdds=null;
-        document.getElementById('calcOddsBtn').addEventListener('click',()=>{
-            const t1=document.getElementById('newTeam1').value.trim(), t2=document.getElementById('newTeam2').value.trim();
-            if(!t1||!t2) return alert('Введите названия обеих команд');
-            const ev1=evaluateTeam(t1), ev2=evaluateTeam(t2);
-            calculatedOdds=autoOdds(ev1,ev2);
-            document.getElementById('odd1').textContent=calculatedOdds['1'].toFixed(2);
-            document.getElementById('oddX').textContent=calculatedOdds['X'].toFixed(2);
-            document.getElementById('odd2').textContent=calculatedOdds['2'].toFixed(2);
-            document.getElementById('oddTB').textContent=calculatedOdds['TB'].toFixed(2);
-            document.getElementById('oddTM').textContent=calculatedOdds['TM'].toFixed(2);
-            document.getElementById('oddOZ').textContent=calculatedOdds['OZ'].toFixed(2);
-            document.getElementById('calculatedOdds').style.display='block';
-            document.getElementById('addMatchBtn').style.display='inline-block';
-        });
-        document.getElementById('addMatchBtn').addEventListener('click',async()=>{
-            if(!calculatedOdds) return;
-            const div=document.getElementById('newDivision').value;
-            const t1=document.getElementById('newTeam1').value.trim(), t2=document.getElementById('newTeam2').value.trim();
-            matches.push({id:'m_'+Date.now(),division:div,team1:t1,team2:t2,
-                odds:{'1':calculatedOdds['1'],'X':calculatedOdds['X'],'2':calculatedOdds['2']},
-                odds_TB:calculatedOdds['TB'],odds_TM:calculatedOdds['TM'],odds_OZ:calculatedOdds['OZ'],
-                status:'open',score:null,result:null});
+            <button class="action-btn" id="calcBtn">Рассчитать коэффициенты</button>
+            <button class="action-btn" id="addMatchBtn" style="display:none;margin-top:10px;">Добавить матч</button>`;
+        let odds = null;
+        document.getElementById('calcBtn').onclick = () => {
+            const t1 = document.getElementById('newTeam1').value.trim(), t2 = document.getElementById('newTeam2').value.trim();
+            if (!t1 || !t2) return alert('Введите обе команды');
+            const ev1 = evaluateTeam(t1), ev2 = evaluateTeam(t2);
+            odds = autoOdds(ev1, ev2);
+            ['1','X','2','TB','TM','OZ'].forEach(k => document.getElementById('odd'+k).textContent = odds[k].toFixed(2));
+            document.getElementById('calcOdds').style.display = 'block';
+            document.getElementById('addMatchBtn').style.display = 'inline-block';
+        };
+        document.getElementById('addMatchBtn').onclick = async () => {
+            if (!odds) return;
+            const d = document.getElementById('newDiv').value;
+            const t1 = document.getElementById('newTeam1').value.trim(), t2 = document.getElementById('newTeam2').value.trim();
+            matches.push({ id:'m_'+Date.now(), division:d, team1:t1, team2:t2, odds:{ '1':odds['1'], 'X':odds['X'], '2':odds['2'] }, odds_TB:odds['TB'], odds_TM:odds['TM'], odds_OZ:odds['OZ'], status:'open', score:null, result:null });
             await saveMatches();
             alert('Матч добавлен!');
-            document.getElementById('newTeam1').value=''; document.getElementById('newTeam2').value='';
-            document.getElementById('calculatedOdds').style.display='none'; document.getElementById('addMatchBtn').style.display='none';
-            calculatedOdds=null;
-        });
+            document.getElementById('newTeam1').value = ''; document.getElementById('newTeam2').value = '';
+            document.getElementById('calcOdds').style.display = 'none'; document.getElementById('addMatchBtn').style.display = 'none';
+            odds = null;
+        };
     }
 
-    function renderAdminResults(){
-        const closedNoScore=matches.filter(m=>m.status==='closed'&&!m.score);
-        let html='<div class="section-title">Ввод счёта</div>';
-        if(closedNoScore.length===0) html+='<p style="color:#aaa;">Нет матчей для ввода счёта</p>';
-        else closedNoScore.forEach(m=>{
-            html+=`<div style="background:var(--card-bg); border-radius:18px; padding:15px; margin-bottom:12px;">
+    function renderAdminResults() {
+        const list = matches.filter(m => m.status === 'closed' && !m.score);
+        let html = '<div class="section-title">Ввод счёта</div>';
+        if (list.length === 0) html += '<p style="color:#aaa;">Нет матчей для ввода счёта</p>';
+        else list.forEach(m => {
+            html += `<div style="background:var(--card-bg);border-radius:18px;padding:15px;margin-bottom:12px;">
                 <strong>${m.team1} — ${m.team2}</strong> (${m.division})<br>
-                <div style="display:flex; gap:10px; align-items:center; margin-top:10px;">
-                    <input type="number" class="scoreT1" placeholder="${m.team1}" style="width:60px; background:#0f0f1a; color:white; padding:10px; border-radius:12px;">
+                <div style="display:flex;gap:10px;align-items:center;margin-top:10px;">
+                    <input type="number" class="scoreT1" placeholder="${m.team1}" style="width:60px;background:#0f0f1a;color:white;padding:10px;border-radius:12px;">
                     <span>:</span>
-                    <input type="number" class="scoreT2" placeholder="${m.team2}" style="width:60px; background:#0f0f1a; color:white; padding:10px; border-radius:12px;">
+                    <input type="number" class="scoreT2" placeholder="${m.team2}" style="width:60px;background:#0f0f1a;color:white;padding:10px;border-radius:12px;">
                     <button class="action-btn saveScore" data-id="${m.id}">Сохранить</button>
                 </div></div>`;
         });
-        tabContent.innerHTML=html;
-        document.querySelectorAll('.saveScore').forEach(btn=>{ btn.addEventListener('click',async()=>{
-            const id=btn.dataset.id;
-            const parent=btn.parentElement.parentElement;
-            const t1=+parent.querySelector('.scoreT1').value, t2=+parent.querySelector('.scoreT2').value;
-            if(isNaN(t1)||isNaN(t2)) return alert('Введите числа');
-            const m=matches.find(x=>x.id===id);
-            if(m){
-                m.score={t1,t2}; m.result=(t1>t2)?'1':(t1===t2)?'X':'2';
+        els.tab.innerHTML = html;
+        els.tab.querySelectorAll('.saveScore').forEach(b => b.onclick = async () => {
+            const id = b.dataset.id;
+            const t1 = +b.parentElement.querySelector('.scoreT1').value, t2 = +b.parentElement.querySelector('.scoreT2').value;
+            if (isNaN(t1) || isNaN(t2)) return alert('Введите числа');
+            const m = matches.find(x => x.id === id);
+            if (m) {
+                m.score = { t1, t2 }; m.result = (t1 > t2) ? '1' : (t1 === t2) ? 'X' : '2';
                 await saveMatches();
-                users.forEach(u=>{ u.bets.forEach(bet=>{
-                    if(bet.status!=='pending') return;
-                    if(bet.type==='single'&&bet.matchId===id){
-                        let win=false;
-                        if(['1','X','2'].includes(bet.outcome)) win=bet.outcome===m.result;
-                        else if(bet.outcome==='TB') win=(t1+t2)>2.5; else if(bet.outcome==='TM') win=(t1+t2)<2.5; else if(bet.outcome==='OZ') win=t1>0&&t2>0;
-                        bet.status=win?'win':'lose'; if(win){ bet.winAmount=bet.amount*bet.odds; u.balance+=bet.winAmount; }
-                    }else if(bet.type==='express'){
-                        const allResolved=bet.legs.every(l=>{ const m2=matches.find(x=>x.id===l.matchId); return m2&&m2.score; });
-                        if(allResolved){
-                            const allWin=bet.legs.every(l=>{
-                                const m2=matches.find(x=>x.id===l.matchId);
-                                if(['1','X','2'].includes(l.outcome)) return l.outcome===m2.result;
-                                if(l.outcome==='TB') return (m2.score.t1+m2.score.t2)>2.5;
-                                if(l.outcome==='TM') return (m2.score.t1+m2.score.t2)<2.5;
-                                if(l.outcome==='OZ') return m2.score.t1>0&&m2.score.t2>0;
-                            });
-                            bet.status=allWin?'win':'lose'; if(allWin){ bet.winAmount=bet.amount*bet.totalOdds; u.balance+=bet.winAmount; }
+                users.forEach(u => {
+                    const bets = u.bets || [];
+                    bets.forEach(bet => {
+                        if (bet.status !== 'pending') return;
+                        if (bet.type === 'single' && bet.matchId === id) {
+                            let win = false;
+                            if (['1','X','2'].includes(bet.outcome)) win = bet.outcome === m.result;
+                            else if (bet.outcome === 'TB') win = (t1 + t2) > 2.5;
+                            else if (bet.outcome === 'TM') win = (t1 + t2) < 2.5;
+                            else if (bet.outcome === 'OZ') win = t1 > 0 && t2 > 0;
+                            bet.status = win ? 'win' : 'lose'; if (win) { bet.winAmount = bet.amount * bet.odds; u.balance += bet.winAmount; }
+                        } else if (bet.type === 'express') {
+                            const allRes = bet.legs.every(l => { const m2 = matches.find(x => x.id === l.matchId); return m2 && m2.score; });
+                            if (allRes) {
+                                const allWin = bet.legs.every(l => {
+                                    const m2 = matches.find(x => x.id === l.matchId);
+                                    if (['1','X','2'].includes(l.outcome)) return l.outcome === m2.result;
+                                    if (l.outcome === 'TB') return (m2.score.t1 + m2.score.t2) > 2.5;
+                                    if (l.outcome === 'TM') return (m2.score.t1 + m2.score.t2) < 2.5;
+                                    if (l.outcome === 'OZ') return m2.score.t1 > 0 && m2.score.t2 > 0;
+                                });
+                                bet.status = allWin ? 'win' : 'lose'; if (allWin) { bet.winAmount = bet.amount * bet.totalOdds; u.balance += bet.winAmount; }
+                            }
                         }
-                    }
-                })});
-                await saveUsers(); alert('Счёт сохранён, ставки рассчитаны!'); renderTab('adminResults');
-            }
-        })});
-    }
-
-    function getTeamFinishedMatches(teamName){
-        const norm=normalizeTeamName(teamName);
-        return matches.filter(m=>m.score&&(normalizeTeamName(m.team1)===norm||normalizeTeamName(m.team2)===norm));
-    }
-    function evaluateTeam(teamName){
-        const finished=getTeamFinishedMatches(teamName);
-        if(finished.length===0) return {form:3,crisis:false,matchesCount:0};
-        let points=0,totalDiff=0,bigLosses=0;
-        finished.forEach(m=>{
-            const isTeam1=normalizeTeamName(m.team1)===normalizeTeamName(teamName);
-            const scored=isTeam1?m.score.t1:m.score.t2, conceded=isTeam1?m.score.t2:m.score.t1;
-            const diff=scored-conceded; totalDiff+=diff;
-            if(scored>conceded) points+=3; else if(scored===conceded) points+=1;
-            if(diff<=-3) bigLosses++;
-        });
-        const avgPoints=points/finished.length;
-        const crisis=(bigLosses>=2&&totalDiff<=-5);
-        const form=Math.min(10,Math.max(1,avgPoints*2.5));
-        return {form,crisis,matchesCount:finished.length};
-    }
-    function autoOdds(ev1,ev2){
-        let odds1,odds2,oddsX;
-        if(ev1.crisis&&!ev2.crisis){ odds1=4.0+Math.random()*1.5; odds2=1.4+Math.random()*0.6; }
-        else if(ev2.crisis&&!ev1.crisis){ odds2=4.0+Math.random()*1.5; odds1=1.4+Math.random()*0.6; }
-        else{
-            const totalForm=ev1.form+ev2.form||1;
-            const prob1=ev1.form/totalForm, prob2=ev2.form/totalForm;
-            const probX=Math.max(0.15,0.3-Math.abs(prob1-prob2)*0.3);
-            const sum=prob1+prob2+probX, margin=0.92;
-            odds1=Math.min(2.5,Math.max(1.5,margin/(prob1/sum)));
-            odds2=Math.min(2.5,Math.max(1.5,margin/(prob2/sum)));
-            oddsX=Math.min(3.5,Math.max(1.8,margin/(probX/sum)));
-        }
-        const avgForm=(ev1.form+ev2.form)/2;
-        const tb=Math.min(2.4,Math.max(1.6,2.0-(avgForm-3)*0.15));
-        const tm=Math.min(2.4,Math.max(1.6,1.9+(avgForm-3)*0.1));
-        const oz=Math.min(2.5,Math.max(1.7,2.1+(avgForm-3)*0.3));
-        return {'1':+odds1.toFixed(2),'X':+oddsX.toFixed(2),'2':+odds2.toFixed(2),
-                'TB':+tb.toFixed(2),'TM':+tm.toFixed(2),'OZ':+oz.toFixed(2),
-                form1:ev1.form.toFixed(1),form2:ev2.form.toFixed(1),matches1:ev1.matchesCount,matches2:ev2.matchesCount};
-    }
-
-    function checkPendingBets(){
-        const user=getCurrentUser(); if(!user||user.role==='admin') return;
-        const resolved=[];
-        user.bets.forEach(bet=>{
-            if(bet.status!=='pending') return;
-            if(bet.type==='single'){
-                const match=matches.find(m=>m.id===bet.matchId);
-                if(match&&match.score){
-                    let win=false;
-                    if(['1','X','2'].includes(bet.outcome)) win=bet.outcome===match.result;
-                    else if(bet.outcome==='TB') win=(match.score.t1+match.score.t2)>2.5;
-                    else if(bet.outcome==='TM') win=(match.score.t1+match.score.t2)<2.5;
-                    else if(bet.outcome==='OZ') win=match.score.t1>0&&match.score.t2>0;
-                    bet.status=win?'win':'lose'; if(win){ bet.winAmount=bet.amount*bet.odds; user.balance+=bet.winAmount; }
-                    resolved.push({bet,match});
-                }
-            }else if(bet.type==='express'){
-                const allResolved=bet.legs.every(l=>{ const m=matches.find(x=>x.id===l.matchId); return m&&m.score; });
-                if(allResolved){
-                    const allWin=bet.legs.every(l=>{
-                        const m=matches.find(x=>x.id===l.matchId);
-                        if(['1','X','2'].includes(l.outcome)) return l.outcome===m.result;
-                        if(l.outcome==='TB') return (m.score.t1+m.score.t2)>2.5;
-                        if(l.outcome==='TM') return (m.score.t1+m.score.t2)<2.5;
-                        if(l.outcome==='OZ') return m.score.t1>0&&m.score.t2>0;
                     });
-                    bet.status=allWin?'win':'lose'; if(allWin){ bet.winAmount=bet.amount*bet.totalOdds; user.balance+=bet.winAmount; }
-                    resolved.push({bet,match:null});
+                });
+                await saveUsers();
+                alert('Счёт сохранён, ставки рассчитаны!'); renderTab('adminResults');
+            }
+        });
+    }
+
+    function evaluateTeam(teamName) {
+        const norm = normName(teamName);
+        const finished = matches.filter(m => m.score && (normName(m.team1) === norm || normName(m.team2) === norm));
+        if (finished.length === 0) return { form:3, crisis:false, matchesCount:0 };
+        let points=0, diffTotal=0, bigLosses=0;
+        finished.forEach(m => {
+            const isT1 = normName(m.team1) === norm;
+            const scored = isT1 ? m.score.t1 : m.score.t2, conceded = isT1 ? m.score.t2 : m.score.t1;
+            const diff = scored - conceded; diffTotal += diff;
+            if (scored > conceded) points += 3; else if (scored === conceded) points += 1;
+            if (diff <= -3) bigLosses++;
+        });
+        const avg = points / finished.length;
+        const crisis = bigLosses >= 2 && diffTotal <= -5;
+        return { form: Math.min(10, Math.max(1, avg * 2.5)), crisis, matchesCount: finished.length };
+    }
+    function autoOdds(ev1, ev2) {
+        let o1, o2, oX;
+        if (ev1.crisis && !ev2.crisis) { o1 = 4.0 + Math.random() * 1.5; o2 = 1.4 + Math.random() * 0.6; }
+        else if (ev2.crisis && !ev1.crisis) { o2 = 4.0 + Math.random() * 1.5; o1 = 1.4 + Math.random() * 0.6; }
+        else {
+            const total = ev1.form + ev2.form || 1;
+            const p1 = ev1.form / total, p2 = ev2.form / total;
+            const pX = Math.max(0.15, 0.3 - Math.abs(p1 - p2) * 0.3);
+            const sum = p1 + p2 + pX, m = 0.92;
+            o1 = Math.min(2.5, Math.max(1.5, m / (p1 / sum)));
+            o2 = Math.min(2.5, Math.max(1.5, m / (p2 / sum)));
+            oX = Math.min(3.5, Math.max(1.8, m / (pX / sum)));
+        }
+        const avgForm = (ev1.form + ev2.form) / 2;
+        const tb = Math.min(2.4, Math.max(1.6, 2.0 - (avgForm - 3) * 0.15));
+        const tm = Math.min(2.4, Math.max(1.6, 1.9 + (avgForm - 3) * 0.1));
+        const oz = Math.min(2.5, Math.max(1.7, 2.1 + (avgForm - 3) * 0.3));
+        return { '1':+o1.toFixed(2), 'X':+oX.toFixed(2), '2':+o2.toFixed(2), TB:+tb.toFixed(2), TM:+tm.toFixed(2), OZ:+oz.toFixed(2), form1:ev1.form.toFixed(1), form2:ev2.form.toFixed(1), matches1:ev1.matchesCount, matches2:ev2.matchesCount };
+    }
+
+    function checkPendingBets() {
+        const user = getCurrentUser(); if (!user || user.role === 'admin') return;
+        const resolved = [];
+        (user.bets || []).forEach(bet => {
+            if (bet.status !== 'pending') return;
+            if (bet.type === 'single') {
+                const m = matches.find(x => x.id === bet.matchId);
+                if (m && m.score) {
+                    let win = false;
+                    if (['1','X','2'].includes(bet.outcome)) win = bet.outcome === m.result;
+                    else if (bet.outcome === 'TB') win = (m.score.t1 + m.score.t2) > 2.5;
+                    else if (bet.outcome === 'TM') win = (m.score.t1 + m.score.t2) < 2.5;
+                    else if (bet.outcome === 'OZ') win = m.score.t1 > 0 && m.score.t2 > 0;
+                    bet.status = win ? 'win' : 'lose'; if (win) { bet.winAmount = bet.amount * bet.odds; user.balance += bet.winAmount; }
+                    resolved.push({ bet, match:m });
+                }
+            } else if (bet.type === 'express') {
+                const allRes = bet.legs.every(l => { const m = matches.find(x => x.id === l.matchId); return m && m.score; });
+                if (allRes) {
+                    const allWin = bet.legs.every(l => {
+                        const m = matches.find(x => x.id === l.matchId);
+                        if (['1','X','2'].includes(l.outcome)) return l.outcome === m.result;
+                        if (l.outcome === 'TB') return (m.score.t1 + m.score.t2) > 2.5;
+                        if (l.outcome === 'TM') return (m.score.t1 + m.score.t2) < 2.5;
+                        if (l.outcome === 'OZ') return m.score.t1 > 0 && m.score.t2 > 0;
+                    });
+                    bet.status = allWin ? 'win' : 'lose'; if (allWin) { bet.winAmount = bet.amount * bet.totalOdds; user.balance += bet.winAmount; }
+                    resolved.push({ bet, match:null });
                 }
             }
         });
-        saveUsers().then(()=>{ if(resolved.length) showResultNotification(resolved); });
+        saveUsers().then(() => { if (resolved.length) showNotifications(resolved); });
     }
 
-    function showResultNotification(resolvedList){
-        let index=0;
-        function showNext(){
-            if(index>=resolvedList.length) return;
-            const item=resolvedList[index];
-            const isWin=item.bet.status==='win';
-            const overlay=document.createElement('div'); overlay.className='modal-overlay';
-            overlay.innerHTML=`<div class="modal-content">
-                <div style="font-size:1.3rem; margin-bottom:15px;">${item.bet.type==='express'?'Ваш экспресс':'Ваша ставка'} ${isWin?'выиграла':'проиграла'}</div>
-                ${item.bet.type==='single'?`<div><strong>${item.match.team1} — ${item.match.team2}</strong></div>`:''}
-                <div style="font-size:2.2rem; font-weight:800; color:${isWin?'var(--success)':'var(--danger)'};">${isWin?'СЫГРАЛА':'НЕ СЫГРАЛА'}</div>
-                <div style="margin-top:15px; color:#aaa;">Баланс обновлён в Профиле</div>
-                <button class="modal-btn ${isWin?'green':'red'} closeModal">Ок</button>
+    function showNotifications(list) {
+        let idx = 0;
+        function show() {
+            if (idx >= list.length) return;
+            const { bet, match } = list[idx];
+            const win = bet.status === 'win';
+            const overlay = document.createElement('div'); overlay.className = 'modal-overlay';
+            overlay.innerHTML = `<div class="modal-content">
+                <div style="font-size:1.2rem;margin-bottom:15px;">${bet.type==='express'?'Ваш экспресс':'Ваша ставка'} ${win?'выиграла':'проиграла'}</div>
+                ${bet.type==='single'?`<div><strong>${match.team1} — ${match.team2}</strong></div>`:''}
+                <div style="font-size:2rem;font-weight:800;color:${win?'var(--success)':'var(--danger)'};">${win?'СЫГРАЛА':'НЕ СЫГРАЛА'}</div>
+                <div style="margin-top:15px;color:#aaa;">Баланс обновлён в Профиле</div>
+                <button class="modal-btn ${win?'green':'red'} closeModal">Ок</button>
             </div>`;
             document.body.appendChild(overlay);
-            const closeBtn=overlay.querySelector('.closeModal');
-            const timeout=setTimeout(()=>{ overlay.remove(); index++; showNext(); },7000);
-            closeBtn.addEventListener('click',()=>{ clearTimeout(timeout); overlay.remove(); index++; showNext(); });
+            const close = overlay.querySelector('.closeModal');
+            const timer = setTimeout(() => { overlay.remove(); idx++; show(); }, 7000);
+            close.onclick = () => { clearTimeout(timer); overlay.remove(); idx++; show(); };
         }
-        showNext();
+        show();
     }
 
-    window.addEventListener('load',async()=>{
-        await loadUsers(); await loadMatches();
-        if(currentUsername && users.some(u=>u.username===currentUsername)) await showMain();
+    window.onload = async () => {
+        await loadData();
+        if (currentUsername && users.some(u => u.username === currentUsername)) await showMain();
         else showWelcome();
-        db.ref('matches').on('value',snap=>{
-            matches = snap.val() ? Object.values(snap.val()) : [];
-            if(!welcomeScreen.classList.contains('hidden') && currentTab) renderTab(currentTab);
-        });
-        db.ref('users').on('value',snap=>{
-            users = snap.val() ? Object.values(snap.val()) : [];
-            if(currentTab==='news') renderTab('news');
-        });
-    });
+        db.ref('matches').on('value', s => { matches = s.val() ? Object.values(s.val()) : []; if (!els.welcome.classList.contains('hidden') && currentTab) renderTab(currentTab); });
+        db.ref('users').on('value', s => { users = s.val() ? Object.values(s.val()) : []; users.forEach(u => u.bets = u.bets || []); ensureAdmins(); if (currentTab === 'news') renderTab('news'); });
+    };
 </script>
 </body>
 </html>
