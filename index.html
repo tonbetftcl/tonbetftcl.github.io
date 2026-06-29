@@ -92,7 +92,7 @@
 <div class="app-container" id="appContainer">
     <div id="welcomeScreen">
         <div class="welcome-logo">TonBet</div>
-        <div class="welcome-text">TonBet – Официальный сайт новостника TonBox, для лиги ФТКЛ. На нашем сайте вы можете ставить ставки на матчи 1 и 3 дивизиона ФТКЛ! Зарабатывай коины, повышайся в топе и становись лучшим вместе с TonBet!с</div>
+        <div class="welcome-text">TonBet – Официальный сайт новостника TonBox, для лиги ФТКЛ. На нашем сайте вы можете ставить ставки на матчи 1 и 3 дивизиона ФТКЛ! Зарабатывай коины, повышайся в топе и становись лучшим вместе с TonBet!</div>
         <button class="continue-btn" id="continueBtn">Продолжить</button>
     </div>
 
@@ -157,7 +157,7 @@
     let users = [], matches = [];
     let currentUsername = sessionStorage.getItem('tonbet_current') || null;
     let currentFilter = 'all', currentTab = 'matches';
-    const normName = n => n.toLowerCase().replace(/ё/g, 'е');
+    const normName = n => n.trim().toLowerCase().replace(/\s+/g, ' ').replace(/ё/g, 'е');
 
     async function loadData() {
         const [usersSnap, matchesSnap] = await Promise.all([
@@ -167,6 +167,7 @@
         users = usersSnap.val() ? Object.values(usersSnap.val()) : [];
         matches = matchesSnap.val() ? Object.values(matchesSnap.val()) : [];
         users.forEach(u => u.bets = u.bets || []);
+        matches.forEach(m => { if (m.archived === undefined) m.archived = false; });
         ensureAdmins();
     }
     function ensureAdmins() {
@@ -342,8 +343,7 @@
         }
     }
 
-    // ---------- ПОЛЬЗОВАТЕЛЬСКИЕ ВКЛАДКИ (без изменений) ----------
-    // Экспресс
+    // ---------- ПОЛЬЗОВАТЕЛЬСКИЕ ВКЛАДКИ ----------
     let expressState = { step:'divisions', sel:[], div:null, outcomes:{}, totalOdds:0 };
     function renderExpress() {
         if (expressState.step === 'divisions') {
@@ -351,7 +351,7 @@
             const grid = els.tab.querySelector('.division-grid');
             DIVISIONS.forEach(d => { const c = document.createElement('div'); c.className = 'division-card'; c.textContent = d; c.onclick = () => { expressState.div = d; expressState.step = 'matches'; renderExpress(); }; grid.appendChild(c); });
         } else if (expressState.step === 'matches') {
-            const open = matches.filter(m => m.division === expressState.div && m.status === 'open');
+            const open = matches.filter(m => m.division === expressState.div && m.status === 'open' && !m.archived);
             els.tab.innerHTML = `<div class="back-link">← Назад</div><div class="section-title">Экспресс – ${expressState.div}</div><div class="match-list"></div><button class="action-btn" id="readyBtn" disabled>Готово (0)</button>`;
             els.tab.querySelector('.back-link').onclick = () => { expressState.step = 'divisions'; renderExpress(); };
             const list = els.tab.querySelector('.match-list');
@@ -408,7 +408,6 @@
         }
     }
 
-    // Матчи
     let matchState = { view:'divisions', div:null, match:null };
     function renderMatches() {
         if (matchState.view === 'divisions') {
@@ -416,7 +415,7 @@
             const grid = els.tab.querySelector('.division-grid');
             DIVISIONS.forEach(d => { const c = document.createElement('div'); c.className = 'division-card'; c.textContent = d; c.onclick = () => { matchState.div = d; matchState.view = 'matches'; renderMatches(); }; grid.appendChild(c); });
         } else if (matchState.view === 'matches') {
-            const list = matches.filter(m => m.division === matchState.div && m.status === 'open');
+            const list = matches.filter(m => m.division === matchState.div && m.status === 'open' && !m.archived);
             els.tab.innerHTML = `<div class="back-link">← Назад</div><div class="section-title">${matchState.div}</div><div class="match-list"></div>`;
             els.tab.querySelector('.back-link').onclick = () => { matchState.view = 'divisions'; renderMatches(); };
             const ml = els.tab.querySelector('.match-list');
@@ -470,7 +469,6 @@
         }
     }
 
-    // Мои ставки
     function renderMyBets() {
         const user = getCurrentUser();
         if (!user) { els.tab.innerHTML = '<div class="section-title">Войдите заново</div>'; return; }
@@ -512,7 +510,6 @@
         els.tab.querySelectorAll('.filter-tab').forEach(t => t.onclick = () => { currentFilter = t.dataset.f; renderMyBets(); });
     }
 
-    // Профиль
     function renderProfile() {
         const user = getCurrentUser();
         if (!user) { els.tab.innerHTML = '<div class="section-title">Войдите заново</div>'; return; }
@@ -531,7 +528,6 @@
         els.tab.querySelector('#logoutProfileBtn').onclick = logout;
     }
 
-    // Инфо
     const news = [{ title:'СТАРТ ПРОЕКТА', text:'TonBet запущен! Ставки на ФТКЛ, зарабатывайте коины.' }];
     function renderNews() {
         const total = users.filter(u => u.role !== 'admin').length;
@@ -546,7 +542,6 @@
         els.tab.querySelectorAll('.news-item').forEach(n => n.onclick = () => document.getElementById(`nd${n.dataset.idx}`).classList.toggle('hidden'));
     }
 
-    // Топ 10
     function renderLeaderboard() {
         const stats = users.filter(u => u.role !== 'admin').map(u => {
             const bets = u.bets || [];
@@ -564,7 +559,7 @@
         els.tab.innerHTML = html;
     }
 
-    // ---------- АДМИНКА (полная, с добавлением матчей) ----------
+    // ---------- АДМИНКА ----------
     function renderAdminManage() {
         let html = '<div class="section-title">Управление матчами</div>';
         html += `<div style="margin-bottom:10px;">
@@ -572,8 +567,9 @@
             <button class="action-btn" id="massCloseBtn">Закрыть все линии</button>
             <button class="action-btn" id="deleteAllMatchesBtn">Удалить все матчи</button>
         </div>`;
-        if (matches.length === 0) html += '<p style="color:#aaa;">Нет матчей</p>';
-        else matches.forEach(m => {
+        const visibleMatches = matches.filter(m => !m.archived);
+        if (visibleMatches.length === 0) html += '<p style="color:#aaa;">Нет активных матчей</p>';
+        else visibleMatches.forEach(m => {
             html += `<div style="background:var(--card-bg);border-radius:18px;padding:15px;margin-bottom:12px;">
                 <strong>${m.team1} — ${m.team2}</strong> (${m.division})<br>
                 Статус: ${m.status==='open'?'Открыт':'Закрыт'}, Счёт: ${m.score?m.score.t1+':'+m.score.t2:'—'}<br>
@@ -583,18 +579,38 @@
                 <button class="action-btn deleteMatch" data-id="${m.id}">Удалить</button>
                 <button class="action-btn viewBets" data-id="${m.id}">Ставки</button>
                 ${m.status==='closed'&&!m.score?`<button class="action-btn setScoreBtn" data-id="${m.id}">Счёт</button>`:''}
+                <button class="action-btn archiveMatch" data-id="${m.id}">Архивировать</button>
             </div>`;
         });
+        const archivedMatches = matches.filter(m => m.archived);
+        if (archivedMatches.length > 0) {
+            html += '<div class="section-title" style="margin-top:20px;">Архив</div>';
+            archivedMatches.forEach(m => {
+                html += `<div style="background:var(--card-bg);border-radius:18px;padding:15px;margin-bottom:12px;opacity:0.7;">
+                    <strong>${m.team1} — ${m.team2}</strong> (${m.division})<br>
+                    Счёт: ${m.score?m.score.t1+':'+m.score.t2:'—'}<br>
+                    <button class="action-btn restoreMatch" data-id="${m.id}">Восстановить</button>
+                </div>`;
+            });
+        }
         els.tab.innerHTML = html;
         document.getElementById('massOpenBtn')?.addEventListener('click', async () => { matches.forEach(m => m.status = 'open'); await saveMatches(); renderTab('adminManage'); });
         document.getElementById('massCloseBtn')?.addEventListener('click', async () => { matches.forEach(m => m.status = 'closed'); await saveMatches(); renderTab('adminManage'); });
         document.getElementById('deleteAllMatchesBtn')?.addEventListener('click', async () => { if(confirm('Удалить все матчи?')){ matches = []; await saveMatches(); renderTab('adminManage'); } });
         els.tab.querySelectorAll('.closeLine').forEach(b => b.onclick = async () => { const m = matches.find(x => x.id === b.dataset.id); if (m) { m.status = 'closed'; await saveMatches(); renderTab('adminManage'); } });
         els.tab.querySelectorAll('.openLine').forEach(b => b.onclick = async () => { const m = matches.find(x => x.id === b.dataset.id); if (m) { m.status = 'open'; await saveMatches(); renderTab('adminManage'); } });
-        els.tab.querySelectorAll('.deleteMatch').forEach(b => b.onclick = async () => { if(confirm('Удалить матч?')){ matches = matches.filter(x => x.id !== b.dataset.id); await saveMatches(); renderTab('adminManage'); } });
+        els.tab.querySelectorAll('.deleteMatch').forEach(b => b.onclick = async () => { if(confirm('Удалить матч безвозвратно?')){ matches = matches.filter(x => x.id !== b.dataset.id); await saveMatches(); renderTab('adminManage'); } });
         els.tab.querySelectorAll('.editMatch').forEach(b => b.onclick = () => renderEditMatch(b.dataset.id));
         els.tab.querySelectorAll('.viewBets').forEach(b => b.onclick = () => renderMatchBets(b.dataset.id));
         els.tab.querySelectorAll('.setScoreBtn').forEach(b => b.onclick = () => renderAdminResults(b.dataset.id));
+        els.tab.querySelectorAll('.archiveMatch').forEach(b => b.onclick = async () => {
+            const m = matches.find(x => x.id === b.dataset.id);
+            if (m) { m.archived = true; m.status = 'closed'; await saveMatches(); renderTab('adminManage'); }
+        });
+        els.tab.querySelectorAll('.restoreMatch').forEach(b => b.onclick = async () => {
+            const m = matches.find(x => x.id === b.dataset.id);
+            if (m) { m.archived = false; m.status = 'closed'; await saveMatches(); renderTab('adminManage'); }
+        });
     }
 
     function renderEditMatch(matchId) {
@@ -662,6 +678,7 @@
             const t1 = +els.tab.querySelector('.scoreT1').value, t2 = +els.tab.querySelector('.scoreT2').value;
             if (isNaN(t1)||isNaN(t2)) return alert('Введите числа');
             m.score = {t1,t2}; m.result = (t1>t2)?'1':(t1===t2)?'X':'2';
+            m.archived = true;
             await saveMatches();
             users.forEach(u => (u.bets||[]).forEach(bet => {
                 if (bet.status !== 'pending') return;
@@ -687,18 +704,17 @@
                 }
             }));
             await saveUsers();
-            alert('Счёт сохранён, ставки рассчитаны');
+            alert('Счёт сохранён, матч перемещён в архив');
             renderTab('adminManage');
         };
     }
 
-    // Добавить матч (новая вкладка)
     function renderAdminAdd() {
         els.tab.innerHTML = `
             <div class="section-title">Добавить матч</div>
             <div class="input-group"><label>Дивизион</label><select id="newDivision">${DIVISIONS.map(d => `<option>${d}</option>`).join('')}</select></div>
-            <div class="input-group"><label>Команда 1</label><input type="text" id="newTeam1" placeholder="Название"></div>
-            <div class="input-group"><label>Команда 2</label><input type="text" id="newTeam2" placeholder="Название"></div>
+            <div class="input-group"><label>Команда 1 (хозяева)</label><input type="text" id="newTeam1" placeholder="Название"></div>
+            <div class="input-group"><label>Команда 2 (гости)</label><input type="text" id="newTeam2" placeholder="Название"></div>
             <div id="calculatedOdds" style="margin:15px 0; display:none;">
                 <div class="form-info" style="display:flex; justify-content:space-between; margin-bottom:10px;">
                     <span id="form1Info"></span><span id="form2Info"></span>
@@ -720,7 +736,7 @@
             const t2 = document.getElementById('newTeam2').value.trim();
             if (!t1 || !t2) return alert('Введите названия обеих команд');
             const ev1 = evaluateTeam(t1), ev2 = evaluateTeam(t2);
-            calculatedOdds = autoOdds(ev1, ev2);
+            calculatedOdds = autoOdds(ev1, ev2, true);
             document.getElementById('odd1').textContent = calculatedOdds['1'].toFixed(2);
             document.getElementById('oddX').textContent = calculatedOdds['X'].toFixed(2);
             document.getElementById('odd2').textContent = calculatedOdds['2'].toFixed(2);
@@ -749,7 +765,8 @@
                 odds_OZ: calculatedOdds['OZ'],
                 status: 'open',
                 score: null,
-                result: null
+                result: null,
+                archived: false
             });
             await saveMatches();
             alert('Матч добавлен!');
@@ -761,7 +778,6 @@
         };
     }
 
-    // Остальные функции админки (пользователи, уведомления, экспорт) остаются без изменений
     function renderAdminUsers() {
         let html = '<div class="section-title">Пользователи</div>';
         users.forEach(u => {
@@ -828,7 +844,6 @@
         };
     }
 
-    // Вспомогательные функции (без изменений)
     function getTeamFinishedMatches(teamName) {
         const norm = normName(teamName);
         return matches.filter(m => m.score && (normName(m.team1) === norm || normName(m.team2) === norm));
@@ -838,7 +853,7 @@
         if (finished.length === 0) return { form:3, crisis:false, matchesCount:0 };
         let points=0, diffTotal=0, bigLosses=0;
         finished.forEach(m => {
-            const isT1 = normName(m.team1) === norm;
+            const isT1 = normName(m.team1) === normName(teamName);
             const scored = isT1 ? m.score.t1 : m.score.t2, conceded = isT1 ? m.score.t2 : m.score.t1;
             const diff = scored - conceded; diffTotal += diff;
             if (scored > conceded) points += 3; else if (scored === conceded) points += 1;
@@ -848,13 +863,17 @@
         const crisis = bigLosses >= 2 && diffTotal <= -5;
         return { form: Math.min(10, Math.max(1, avg * 2.5)), crisis, matchesCount: finished.length };
     }
-    function autoOdds(ev1, ev2) {
+    function autoOdds(ev1, ev2, homeBonus = false) {
         let o1, o2, oX;
         if (ev1.crisis && !ev2.crisis) { o1 = 4.0 + Math.random() * 1.5; o2 = 1.4 + Math.random() * 0.6; }
         else if (ev2.crisis && !ev1.crisis) { o2 = 4.0 + Math.random() * 1.5; o1 = 1.4 + Math.random() * 0.6; }
         else {
             const total = ev1.form + ev2.form || 1;
-            const p1 = ev1.form / total, p2 = ev2.form / total;
+            let p1 = ev1.form / total, p2 = ev2.form / total;
+            if (homeBonus) {
+                p1 = Math.min(0.9, p1 * 1.08);
+                p2 = Math.max(0.1, p2 * 0.92);
+            }
             const pX = Math.max(0.15, 0.3 - Math.abs(p1 - p2) * 0.3);
             const sum = p1 + p2 + pX, m = 0.92;
             o1 = Math.min(2.5, Math.max(1.5, m / (p1 / sum)));
@@ -928,7 +947,7 @@
         await loadData();
         if (currentUsername && users.some(u => u.username === currentUsername)) await showMain();
         else showWelcome();
-        db.ref('matches').on('value', s => { matches = s.val() ? Object.values(s.val()) : []; if (!els.welcome.classList.contains('hidden') && currentTab) renderTab(currentTab); });
+        db.ref('matches').on('value', s => { matches = s.val() ? Object.values(s.val()) : []; matches.forEach(m => { if (m.archived === undefined) m.archived = false; }); if (!els.welcome.classList.contains('hidden') && currentTab) renderTab(currentTab); });
         db.ref('users').on('value', s => { users = s.val() ? Object.values(s.val()) : []; users.forEach(u => u.bets = u.bets || []); ensureAdmins(); if (currentTab === 'news') renderTab('news'); });
     };
 </script>
