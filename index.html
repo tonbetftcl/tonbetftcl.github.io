@@ -37,10 +37,10 @@
         .header-right{ display:flex; align-items:center; }
         .logout-header-btn{ background:rgba(255,255,255,0.05); border:1px solid rgba(233,69,96,0.5); color:#fff; padding:8px 16px; border-radius:12px; font-weight:600; font-size:0.9rem; cursor:pointer; }
         .logout-header-btn:hover{ background:var(--primary); }
-        .bottom-nav{ position:fixed; bottom:15px; left:50%; transform:translateX(-50%); width:calc(100% - 30px); max-width:450px; background:rgba(20,25,40,0.9); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-radius:30px; display:flex; justify-content:space-around; padding:8px 4px; box-shadow:0 10px 30px rgba(0,0,0,0.5); border:1px solid rgba(233,69,96,0.15); z-index:10; }
-        .nav-item{ flex:1 1 auto; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#8888a0; font-size:0.52rem; font-weight:500; cursor:pointer; padding:6px 2px; border-radius:18px; gap:2px; text-align:center; line-height:1.1; }
+        .bottom-nav{ position:fixed; bottom:15px; left:50%; transform:translateX(-50%); width:calc(100% - 30px); max-width:450px; background:rgba(20,25,40,0.9); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-radius:30px; display:flex; justify-content:space-around; padding:6px 2px; box-shadow:0 10px 30px rgba(0,0,0,0.5); border:1px solid rgba(233,69,96,0.15); z-index:10; }
+        .nav-item{ flex:1 1 auto; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#8888a0; font-size:0.5rem; font-weight:500; cursor:pointer; padding:4px 1px; border-radius:18px; gap:1px; text-align:center; line-height:1.1; }
         .nav-item.active{ color:var(--primary); background:rgba(233,69,96,0.1); }
-        .nav-item svg{ width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2; }
+        .nav-item svg{ width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2; }
         .tab-content{ flex:1; padding-bottom:20px; }
         .section-title{ font-size:1.3rem; font-weight:700; margin-bottom:18px; border-left:4px solid var(--primary); padding-left:15px; color:#f0f0ff; }
         .division-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:10px; margin-bottom:20px; }
@@ -130,6 +130,7 @@
     <div class="nav-item" data-tab="express"><svg viewBox="0 0 24 24"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Экспресс</div>
     <div class="nav-item" data-tab="mybets"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Мои ставки</div>
     <div class="nav-item" data-tab="profile"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Профиль</div>
+    <div class="nav-item" data-tab="promo"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>Промокод</div>
     <div class="nav-item" data-tab="news"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Инфо</div>
     <div class="nav-item" data-tab="leaderboard"><svg viewBox="0 0 24 24"><path d="M6 9l6-6 6 6"/><path d="M6 15l6 6 6-6"/></svg>Топ 10</div>
 </div>
@@ -138,6 +139,7 @@
     <div class="nav-item active" data-tab="adminManage">Матчи</div>
     <div class="nav-item" data-tab="adminAdd">Добавить</div>
     <div class="nav-item" data-tab="adminUsers">Пользователи</div>
+    <div class="nav-item" data-tab="adminPromo">Промокоды</div>
     <div class="nav-item" data-tab="adminNotifications">Уведомления</div>
     <div class="nav-item" data-tab="adminExport">Экспорт</div>
 </div>
@@ -154,19 +156,23 @@
     });
     const db = firebase.database();
     const DIVISIONS = ['ФТКЛ 1', 'ФТКЛ 3'];
-    let users = [], matches = [];
+    let users = [], matches = [], promoCodes = [], promoLog = [];
     let currentUsername = sessionStorage.getItem('tonbet_current') || null;
     let currentFilter = 'all', currentTab = 'matches';
     const normName = n => n.trim().toLowerCase().replace(/\s+/g, ' ').replace(/ё/g, 'е');
 
     async function loadData() {
-        const [usersSnap, matchesSnap] = await Promise.all([
+        const [usersSnap, matchesSnap, promosSnap, logSnap] = await Promise.all([
             db.ref('users').once('value'),
-            db.ref('matches').once('value')
+            db.ref('matches').once('value'),
+            db.ref('promoCodes').once('value'),
+            db.ref('promoLog').once('value')
         ]);
         users = usersSnap.val() ? Object.values(usersSnap.val()) : [];
         matches = matchesSnap.val() ? Object.values(matchesSnap.val()) : [];
-        users.forEach(u => u.bets = u.bets || []);
+        promoCodes = promosSnap.val() ? Object.values(promosSnap.val()) : [];
+        promoLog = logSnap.val() ? Object.values(logSnap.val()) : [];
+        users.forEach(u => { u.bets = u.bets || []; if (!u.activatedPromos) u.activatedPromos = []; });
         matches.forEach(m => { if (m.archived === undefined) m.archived = false; });
         ensureAdmins();
     }
@@ -178,17 +184,13 @@
             { username: 'N3bulous', password: 'R4s^8tUe', role: 'admin', balance: 99999, bets: [] }
         ];
         let updated = false;
-        admins.forEach(a => { if (!users.find(u => u.username === a.username)) { users.push({...a, bets: a.bets || []}); updated = true; } });
+        admins.forEach(a => { if (!users.find(u => u.username === a.username)) { users.push({...a, bets: a.bets || [], activatedPromos: []}); updated = true; } });
         if (updated) saveUsers();
     }
-    async function saveUsers() {
-        const obj = {}; users.forEach((u, i) => obj[i] = u);
-        await db.ref('users').set(obj);
-    }
-    async function saveMatches() {
-        const obj = {}; matches.forEach((m, i) => obj[i] = m);
-        await db.ref('matches').set(obj);
-    }
+    async function saveUsers() { const obj = {}; users.forEach((u, i) => obj[i] = u); await db.ref('users').set(obj); }
+    async function saveMatches() { const obj = {}; matches.forEach((m, i) => obj[i] = m); await db.ref('matches').set(obj); }
+    async function savePromoCodes() { const obj = {}; promoCodes.forEach((p, i) => obj[i] = p); await db.ref('promoCodes').set(obj); }
+    async function savePromoLog() { const obj = {}; promoLog.forEach((l, i) => obj[i] = l); await db.ref('promoLog').set(obj); }
     function getCurrentUser() { return users.find(u => u.username === currentUsername); }
 
     const els = {
@@ -238,7 +240,6 @@
         logoutBtn.textContent = 'Выйти';
         logoutBtn.onclick = logout;
         els.headerRight.appendChild(logoutBtn);
-
         renderTab(currentTab);
         checkPendingBets();
         checkAdminNotification();
@@ -259,14 +260,8 @@
                 <button class="modal-btn green closeModal">Ок</button>
             </div>`;
             document.body.appendChild(overlay);
-            overlay.querySelector('.closeModal').onclick = () => {
-                overlay.remove();
-                sessionStorage.setItem('notif_shown', '1');
-            };
-            setTimeout(() => {
-                if (overlay.parentNode) overlay.remove();
-                sessionStorage.setItem('notif_shown', '1');
-            }, 10000);
+            overlay.querySelector('.closeModal').onclick = () => { overlay.remove(); sessionStorage.setItem('notif_shown', '1'); };
+            setTimeout(() => { if (overlay.parentNode) overlay.remove(); sessionStorage.setItem('notif_shown', '1'); }, 10000);
         }
     }
 
@@ -302,7 +297,7 @@
         if (!u || !p || !pc) return document.getElementById('regError').textContent = 'Заполните все поля';
         if (p !== pc) return document.getElementById('regError').textContent = 'Пароли не совпадают';
         if (users.some(x => x.username === u)) return document.getElementById('regError').textContent = 'Ник занят';
-        users.push({ username: u, password: p, balance: 1000, bets: [], role: 'user', banned: false });
+        users.push({ username: u, password: p, balance: 1000, bets: [], role: 'user', banned: false, activatedPromos: [] });
         await saveUsers();
         alert('Регистрация успешна!');
         document.getElementById('regUsername').value = ''; document.getElementById('regPassword').value = '';
@@ -331,6 +326,7 @@
             if (tab === 'adminManage') renderAdminManage();
             else if (tab === 'adminAdd') renderAdminAdd();
             else if (tab === 'adminUsers') renderAdminUsers();
+            else if (tab === 'adminPromo') renderAdminPromo();
             else if (tab === 'adminNotifications') renderAdminNotifications();
             else if (tab === 'adminExport') renderAdminExport();
         } else {
@@ -338,12 +334,14 @@
             else if (tab === 'express') renderExpress();
             else if (tab === 'mybets') renderMyBets();
             else if (tab === 'profile') renderProfile();
+            else if (tab === 'promo') renderPromo();
             else if (tab === 'news') renderNews();
             else if (tab === 'leaderboard') renderLeaderboard();
         }
     }
 
     // ---------- ПОЛЬЗОВАТЕЛЬСКИЕ ВКЛАДКИ ----------
+    // Экспресс
     let expressState = { step:'divisions', sel:[], div:null, outcomes:{}, totalOdds:0 };
     function renderExpress() {
         if (expressState.step === 'divisions') {
@@ -408,6 +406,7 @@
         }
     }
 
+    // Матчи
     let matchState = { view:'divisions', div:null, match:null };
     function renderMatches() {
         if (matchState.view === 'divisions') {
@@ -469,6 +468,7 @@
         }
     }
 
+    // Мои ставки
     function renderMyBets() {
         const user = getCurrentUser();
         if (!user) { els.tab.innerHTML = '<div class="section-title">Войдите заново</div>'; return; }
@@ -510,6 +510,7 @@
         els.tab.querySelectorAll('.filter-tab').forEach(t => t.onclick = () => { currentFilter = t.dataset.f; renderMyBets(); });
     }
 
+    // Профиль
     function renderProfile() {
         const user = getCurrentUser();
         if (!user) { els.tab.innerHTML = '<div class="section-title">Войдите заново</div>'; return; }
@@ -517,6 +518,7 @@
         const fin = bets.filter(b => b.status !== 'pending');
         const wins = fin.filter(b => b.status === 'win').length;
         const wr = fin.length ? ((wins / fin.length) * 100).toFixed(1) : 0;
+        const promoCount = user.activatedPromos ? user.activatedPromos.length : 0;
         els.tab.innerHTML = `
             <div class="section-title">Профиль</div>
             <div class="profile-stat"><span>Ник</span><strong>${user.username}</strong></div>
@@ -524,10 +526,51 @@
             <div class="profile-stat"><span>Ставок</span><strong>${fin.length}</strong></div>
             <div class="profile-stat"><span>Выигрышей</span><strong>${wins}</strong></div>
             <div class="profile-stat"><span>Винрейт</span><strong>${wr}%</strong></div>
+            <div class="profile-stat"><span>Промокодов активировано</span><strong>${promoCount}</strong></div>
             <button class="action-btn" id="logoutProfileBtn" style="margin-top:20px;">Выйти</button>`;
         els.tab.querySelector('#logoutProfileBtn').onclick = logout;
     }
 
+    // Промокод
+    function renderPromo() {
+        const user = getCurrentUser();
+        if (!user) { els.tab.innerHTML = '<div class="section-title">Войдите заново</div>'; return; }
+        let html = '<div class="section-title">Промокод</div>';
+        html += '<div class="input-group"><label>Введите промокод</label><input type="text" id="promoInput" placeholder="Код"></div>';
+        html += '<button class="action-btn" id="activatePromoBtn">Активировать</button>';
+        els.tab.innerHTML = html;
+        document.getElementById('activatePromoBtn').onclick = async () => {
+            const code = document.getElementById('promoInput').value.trim();
+            if (!code) return alert('Введите промокод');
+            if (user.activatedPromos && user.activatedPromos.includes(code)) {
+                alert('Вы уже активировали этот промокод ранее.');
+                return;
+            }
+            const promo = promoCodes.find(p => p.code === code && p.remaining > 0);
+            if (!promo) {
+                alert('Промокод недействителен или исчерпан.');
+                return;
+            }
+            promo.remaining--;
+            if (!user.activatedPromos) user.activatedPromos = [];
+            user.activatedPromos.push(code);
+            user.balance += promo.bonus;
+            promoLog.push({ username: user.username, promoCode: code, amount: promo.bonus, timestamp: Date.now() });
+            await Promise.all([saveUsers(), savePromoCodes(), savePromoLog()]);
+            const overlay = document.createElement('div');
+            overlay.className = 'modal-overlay';
+            overlay.innerHTML = `<div class="modal-content">
+                <div style="font-size:1.3rem;margin-bottom:15px;">Промокод Активирован!</div>
+                <div>Вы успешно активировали промокод, ваша награда составила: ${promo.bonus} коинов!</div>
+                <button class="modal-btn green closeModal">Ок</button>
+            </div>`;
+            document.body.appendChild(overlay);
+            overlay.querySelector('.closeModal').onclick = () => overlay.remove();
+            renderTab('promo');
+        };
+    }
+
+    // Инфо
     const news = [{ title:'СТАРТ ПРОЕКТА', text:'TonBet запущен! Ставки на ФТКЛ, зарабатывайте коины.' }];
     function renderNews() {
         const total = users.filter(u => u.role !== 'admin').length;
@@ -542,6 +585,7 @@
         els.tab.querySelectorAll('.news-item').forEach(n => n.onclick = () => document.getElementById(`nd${n.dataset.idx}`).classList.toggle('hidden'));
     }
 
+    // Топ 10
     function renderLeaderboard() {
         const stats = users.filter(u => u.role !== 'admin').map(u => {
             const bets = u.bets || [];
@@ -807,6 +851,53 @@
         });
     }
 
+    function renderAdminPromo() {
+        let html = '<div class="section-title">Управление промокодами</div>';
+        html += '<div class="input-group"><label>Название промокода</label><input type="text" id="newPromoCode" placeholder="Код"></div>';
+        html += '<div class="input-group"><label>Бонус (коины)</label><input type="number" id="newPromoBonus" placeholder="Сумма"></div>';
+        html += '<div class="input-group"><label>Количество активаций</label><input type="number" id="newPromoLimit" placeholder="Лимит"></div>';
+        html += '<button class="action-btn" id="createPromoBtn">Создать промокод</button>';
+        html += '<div class="section-title" style="margin-top:20px;">Список промокодов</div>';
+        promoCodes.forEach(p => {
+            html += `<div style="background:var(--card-bg);border-radius:14px;padding:12px;margin-bottom:8px;">
+                <strong>${p.code}</strong> | Бонус: ${p.bonus} | Осталось активаций: ${p.remaining}
+                ${p.remaining === 0 ? `<button class="action-btn deletePromo" data-code="${p.code}">Удалить</button>` : ''}
+            </div>`;
+        });
+        html += '<div class="section-title" style="margin-top:20px;">Лог активаций</div>';
+        if (promoLog.length === 0) html += '<p style="color:#aaa;">Нет активаций</p>';
+        else {
+            promoLog.slice().reverse().forEach(entry => {
+                const date = new Date(entry.timestamp).toLocaleString();
+                html += `<div style="background:var(--card-bg);border-radius:12px;padding:10px;margin-bottom:6px;">
+                    <strong>${entry.username}</strong> активировал "${entry.promoCode}" — ${entry.amount} коинов, ${date}
+                </div>`;
+            });
+        }
+        els.tab.innerHTML = html;
+        document.getElementById('createPromoBtn').onclick = async () => {
+            const code = document.getElementById('newPromoCode').value.trim();
+            const bonus = +document.getElementById('newPromoBonus').value;
+            const limit = +document.getElementById('newPromoLimit').value;
+            if (!code || isNaN(bonus) || isNaN(limit) || bonus <= 0 || limit <= 0) return alert('Заполните все поля корректно');
+            if (promoCodes.some(p => p.code === code)) {
+                alert('Промокод с таким названием уже существует');
+                return;
+            }
+            promoCodes.push({ code, bonus, remaining: limit });
+            await savePromoCodes();
+            alert('Промокод создан');
+            renderTab('adminPromo');
+        };
+        els.tab.querySelectorAll('.deletePromo').forEach(b => b.onclick = async () => {
+            if (confirm('Удалить промокод?')) {
+                promoCodes = promoCodes.filter(p => p.code !== b.dataset.code);
+                await savePromoCodes();
+                renderTab('adminPromo');
+            }
+        });
+    }
+
     function renderAdminNotifications() {
         els.tab.innerHTML = `
             <div class="section-title">Уведомления</div>
@@ -870,10 +961,7 @@
         else {
             const total = ev1.form + ev2.form || 1;
             let p1 = ev1.form / total, p2 = ev2.form / total;
-            if (homeBonus) {
-                p1 = Math.min(0.9, p1 * 1.08);
-                p2 = Math.max(0.1, p2 * 0.92);
-            }
+            if (homeBonus) { p1 = Math.min(0.9, p1 * 1.08); p2 = Math.max(0.1, p2 * 0.92); }
             const pX = Math.max(0.15, 0.3 - Math.abs(p1 - p2) * 0.3);
             const sum = p1 + p2 + pX, m = 0.92;
             o1 = Math.min(2.5, Math.max(1.5, m / (p1 / sum)));
@@ -948,7 +1036,9 @@
         if (currentUsername && users.some(u => u.username === currentUsername)) await showMain();
         else showWelcome();
         db.ref('matches').on('value', s => { matches = s.val() ? Object.values(s.val()) : []; matches.forEach(m => { if (m.archived === undefined) m.archived = false; }); if (!els.welcome.classList.contains('hidden') && currentTab) renderTab(currentTab); });
-        db.ref('users').on('value', s => { users = s.val() ? Object.values(s.val()) : []; users.forEach(u => u.bets = u.bets || []); ensureAdmins(); if (currentTab === 'news') renderTab('news'); });
+        db.ref('users').on('value', s => { users = s.val() ? Object.values(s.val()) : []; users.forEach(u => { u.bets = u.bets || []; if (!u.activatedPromos) u.activatedPromos = []; }); ensureAdmins(); if (currentTab === 'news') renderTab('news'); });
+        db.ref('promoCodes').on('value', s => { promoCodes = s.val() ? Object.values(s.val()) : []; if (currentTab === 'adminPromo') renderTab('adminPromo'); });
+        db.ref('promoLog').on('value', s => { promoLog = s.val() ? Object.values(s.val()) : []; if (currentTab === 'adminPromo') renderTab('adminPromo'); });
     };
 </script>
 </body>
