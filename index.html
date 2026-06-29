@@ -357,7 +357,7 @@
     </div>
 
     <script>
-        // Firebase
+        // Firebase Init
         firebase.initializeApp({
             apiKey: "AIzaSyCG1FHpgPg3xC9IHZ0SzaPn0Ngxk8IbwS4",
             authDomain: "tonbetftcl.firebaseapp.com",
@@ -382,9 +382,8 @@
         // Загрузка данных
         async function loadUsers() {
             const snap = await db.ref('users').once('value');
-            const obj = snap.val() || {};
-            users = Object.values(obj);
-            // Добавляем админов, если отсутствуют
+            users = snap.val() ? Object.values(snap.val()) : [];
+            // Добавляем админов, если их нет
             const admins = [
                 { username: 'admin', password: 'admin123', role: 'admin', balance: 99999, bets: [] },
                 { username: 'Astr0n', password: 'X7r!2pQa', role: 'admin', balance: 99999, bets: [] },
@@ -403,8 +402,7 @@
 
         async function loadMatches() {
             const snap = await db.ref('matches').once('value');
-            const obj = snap.val() || {};
-            matches = Object.values(obj);
+            matches = snap.val() ? Object.values(snap.val()) : [];
         }
 
         async function saveUsers() {
@@ -419,16 +417,11 @@
             await db.ref('matches').set(obj);
         }
 
-        function getCurrentUser() {
-            return users.find(u => u.username === currentUsername);
-        }
+        function getCurrentUser() { return users.find(u => u.username === currentUsername); }
 
         async function updateBalance(amount) {
             const user = getCurrentUser();
-            if (user) {
-                user.balance = amount;
-                await saveUsers();
-            }
+            if (user) { user.balance = amount; await saveUsers(); }
         }
 
         // UI
@@ -494,11 +487,8 @@
         }
 
         document.getElementById('continueBtn').addEventListener('click', async () => {
-            if (currentUsername && users.some(u => u.username === currentUsername)) {
-                await showMain();
-            } else {
-                showAuth();
-            }
+            if (currentUsername && users.some(u => u.username === currentUsername)) await showMain();
+            else showAuth();
         });
 
         document.getElementById('showRegisterLink').addEventListener('click', e => {
@@ -580,7 +570,7 @@
             }
         }
 
-        // ---------- ЭКСПРЕСС ----------
+        // ----- ЭКСПРЕСС -----
         let expressState = { step: 'divisions', selectedMatchIds: [], division: null, outcomes: {}, totalOdds: 0 };
         function renderExpress() {
             if (expressState.step === 'divisions') renderExpressDivisions();
@@ -685,7 +675,7 @@
             });
         }
 
-        // ---------- МАТЧИ ----------
+        // ----- МАТЧИ -----
         let matchesState = { view: 'divisions', division: null, match: null };
         function renderMatches() {
             const container = tabContent;
@@ -767,7 +757,7 @@
             }
         }
 
-        // Мои ставки
+        // ----- МОИ СТАВКИ -----
         function renderMyBets() {
             const user = getCurrentUser();
             if (!user) return;
@@ -825,6 +815,7 @@
             });
         }
 
+        // ----- ПРОФИЛЬ -----
         function renderProfile() {
             const user = getCurrentUser();
             if (!user) return;
@@ -843,6 +834,7 @@
             document.getElementById('logoutBtn').addEventListener('click', logout);
         }
 
+        // ----- ИНФО -----
         const news = [{ title: 'СТАРТ ПРОЕКТА', text: 'TonBet запущен! Теперь вы можете делать ставки на матчи ФТКЛ, зарабатывать коины и соревноваться с другими игроками.' }];
         function renderNews() {
             const totalUsers = users.filter(u => u.role !== 'admin').length;
@@ -875,6 +867,7 @@
             });
         }
 
+        // ----- ТОП 10 -----
         function renderLeaderboard() {
             const stats = users.filter(u => u.role !== 'admin').map(u => {
                 let profit = 0;
@@ -894,7 +887,7 @@
             tabContent.innerHTML = html;
         }
 
-        // ---------- АДМИНКА ----------
+        // ----- АДМИНКА -----
         function renderAdminManage() {
             let html = '<div class="section-title">Управление матчами</div>';
             if (matches.length === 0) html += '<p style="color:#aaa;">Нет матчей</p>';
@@ -1055,7 +1048,6 @@
             });
         }
 
-        // Вспомогательные функции расчёта
         function getTeamFinishedMatches(teamName) {
             const norm = normalizeTeamName(teamName);
             return matches.filter(m => m.score && (normalizeTeamName(m.team1) === norm || normalizeTeamName(m.team2) === norm));
@@ -1110,7 +1102,6 @@
             };
         }
 
-        // Проверка ставок при входе
         function checkPendingBets() {
             const user = getCurrentUser();
             if (!user || user.role === 'admin') return;
@@ -1173,7 +1164,6 @@
             showNext();
         }
 
-        // Инициализация
         window.addEventListener('load', async () => {
             await loadUsers();
             await loadMatches();
@@ -1182,19 +1172,14 @@
             } else {
                 showWelcome();
             }
-            // Реалтайм слушатели
-            db.ref('matches').on('value', async (snap) => {
+            // Реалтайм обновления
+            db.ref('matches').on('value', snap => {
                 matches = snap.val() ? Object.values(snap.val()) : [];
-                if (!welcomeScreen.classList.contains('hidden')) {
-                    // Обновляем интерфейс, если не на стартовом экране
-                    if (currentTab) renderTab(currentTab);
-                }
+                if (!welcomeScreen.classList.contains('hidden') && currentTab) renderTab(currentTab);
             });
-            db.ref('users').on('value', async (snap) => {
+            db.ref('users').on('value', snap => {
                 users = snap.val() ? Object.values(snap.val()) : [];
-                // Обновляем счётчик, если на вкладке Инфо
                 if (currentTab === 'news') renderTab('news');
-                // Также можно обновить профиль, если нужно
             });
         });
     </script>
