@@ -37,10 +37,10 @@
         .header-right{ display:flex; align-items:center; }
         .logout-header-btn{ background:rgba(255,255,255,0.05); border:1px solid rgba(233,69,96,0.5); color:#fff; padding:8px 16px; border-radius:12px; font-weight:600; font-size:0.9rem; cursor:pointer; }
         .logout-header-btn:hover{ background:var(--primary); }
-        .bottom-nav{ position:fixed; bottom:15px; left:50%; transform:translateX(-50%); width:calc(100% - 30px); max-width:450px; background:rgba(20,25,40,0.9); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-radius:30px; display:flex; justify-content:space-around; padding:6px 2px; box-shadow:0 10px 30px rgba(0,0,0,0.5); border:1px solid rgba(233,69,96,0.15); z-index:10; }
-        .nav-item{ flex:1 1 auto; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#8888a0; font-size:0.5rem; font-weight:500; cursor:pointer; padding:4px 1px; border-radius:18px; gap:1px; text-align:center; line-height:1.1; }
+        .bottom-nav{ position:fixed; bottom:15px; left:50%; transform:translateX(-50%); width:calc(100% - 30px); max-width:450px; background:rgba(20,25,40,0.9); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-radius:30px; display:flex; justify-content:space-around; padding:8px 4px; box-shadow:0 10px 30px rgba(0,0,0,0.5); border:1px solid rgba(233,69,96,0.15); z-index:10; }
+        .nav-item{ flex:1 1 auto; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#8888a0; font-size:0.52rem; font-weight:500; cursor:pointer; padding:6px 2px; border-radius:18px; gap:2px; text-align:center; line-height:1.1; }
         .nav-item.active{ color:var(--primary); background:rgba(233,69,96,0.1); }
-        .nav-item svg{ width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2; }
+        .nav-item svg{ width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2; }
         .tab-content{ flex:1; padding-bottom:20px; }
         .section-title{ font-size:1.3rem; font-weight:700; margin-bottom:18px; border-left:4px solid var(--primary); padding-left:15px; color:#f0f0ff; }
         .division-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:10px; margin-bottom:20px; }
@@ -144,6 +144,11 @@
     <div class="nav-item" data-tab="adminExport">Экспорт</div>
 </div>
 
+<div id="workerBottomNav" class="bottom-nav hidden">
+    <div class="nav-item active" data-tab="adminManage">Матчи</div>
+    <div class="nav-item" data-tab="adminAdd">Добавить</div>
+</div>
+
 <script>
     firebase.initializeApp({
         apiKey: "AIzaSyCG1FHpgPg3xC9IHZ0SzaPn0Ngxk8IbwS4",
@@ -181,7 +186,8 @@
             { username: 'admin', password: 'admin123', role: 'admin', balance: 99999, bets: [] },
             { username: 'Astr0n', password: 'X7r!2pQa', role: 'admin', balance: 99999, bets: [] },
             { username: 'V0rt3x', password: 'M9z_3kLw', role: 'admin', balance: 99999, bets: [] },
-            { username: 'N3bulous', password: 'R4s^8tUe', role: 'admin', balance: 99999, bets: [] }
+            { username: 'N3bulous', password: 'R4s^8tUe', role: 'admin', balance: 99999, bets: [] },
+            { username: 'worker1', password: 'worker1', role: 'match_manager', balance: 99999, bets: [] }
         ];
         let updated = false;
         admins.forEach(a => { if (!users.find(u => u.username === a.username)) { users.push({...a, bets: a.bets || [], activatedPromos: []}); updated = true; } });
@@ -200,18 +206,19 @@
         tab: document.getElementById('tabContent'),
         bottomNav: document.getElementById('bottomNav'),
         adminNav: document.getElementById('adminBottomNav'),
+        workerNav: document.getElementById('workerBottomNav'),
         headerRight: document.getElementById('headerRight')
     };
 
     function showWelcome() {
         els.welcome.classList.remove('hidden');
         els.auth.classList.add('hidden'); els.main.classList.add('hidden');
-        els.bottomNav.classList.add('hidden'); els.adminNav.classList.add('hidden');
+        els.bottomNav.classList.add('hidden'); els.adminNav.classList.add('hidden'); els.workerNav.classList.add('hidden');
     }
     function showAuth() {
         els.welcome.classList.add('hidden');
         els.auth.classList.remove('hidden'); els.main.classList.add('hidden');
-        els.bottomNav.classList.add('hidden'); els.adminNav.classList.add('hidden');
+        els.bottomNav.classList.add('hidden'); els.adminNav.classList.add('hidden'); els.workerNav.classList.add('hidden');
         document.getElementById('loginForm').classList.remove('hidden');
         document.getElementById('registerForm').classList.add('hidden');
     }
@@ -224,13 +231,25 @@
         els.main.classList.remove('hidden');
         const user = getCurrentUser();
         els.headerRight.innerHTML = '';
-        if (user && user.role === 'admin') {
-            els.bottomNav.classList.add('hidden'); els.adminNav.classList.remove('hidden');
-            currentTab = 'adminManage';
-            document.querySelectorAll('#adminBottomNav .nav-item').forEach(i => i.classList.remove('active'));
-            document.querySelector('#adminBottomNav .nav-item[data-tab="adminManage"]').classList.add('active');
+        if (user && (user.role === 'admin' || user.role === 'match_manager')) {
+            els.bottomNav.classList.add('hidden');
+            if (user.role === 'admin') {
+                els.adminNav.classList.remove('hidden');
+                els.workerNav.classList.add('hidden');
+                currentTab = 'adminManage';
+                document.querySelectorAll('#adminBottomNav .nav-item').forEach(i => i.classList.remove('active'));
+                document.querySelector('#adminBottomNav .nav-item[data-tab="adminManage"]').classList.add('active');
+            } else if (user.role === 'match_manager') {
+                els.adminNav.classList.add('hidden');
+                els.workerNav.classList.remove('hidden');
+                currentTab = 'adminManage';
+                document.querySelectorAll('#workerBottomNav .nav-item').forEach(i => i.classList.remove('active'));
+                document.querySelector('#workerBottomNav .nav-item[data-tab="adminManage"]').classList.add('active');
+            }
         } else {
-            els.bottomNav.classList.remove('hidden'); els.adminNav.classList.add('hidden');
+            els.bottomNav.classList.remove('hidden');
+            els.adminNav.classList.add('hidden');
+            els.workerNav.classList.add('hidden');
             currentTab = 'matches';
             document.querySelectorAll('#bottomNav .nav-item').forEach(i => i.classList.remove('active'));
             document.querySelector('#bottomNav .nav-item[data-tab="matches"]').classList.add('active');
@@ -247,7 +266,7 @@
 
     async function checkAdminNotification() {
         const user = getCurrentUser();
-        if (!user || user.role === 'admin') return;
+        if (!user || user.role === 'admin' || user.role === 'match_manager') return;
         if (sessionStorage.getItem('notif_shown')) return;
         const snap = await db.ref('notification').once('value');
         const text = snap.val();
@@ -318,17 +337,23 @@
         currentTab = item.dataset.tab;
         renderTab(currentTab);
     });
+    document.querySelectorAll('#workerBottomNav .nav-item').forEach(item => item.onclick = () => {
+        document.querySelectorAll('#workerBottomNav .nav-item').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        currentTab = item.dataset.tab;
+        renderTab(currentTab);
+    });
 
     function renderTab(tab) {
         els.tab.innerHTML = '';
         const user = getCurrentUser();
-        if (user && user.role === 'admin') {
+        if (user && (user.role === 'admin' || user.role === 'match_manager')) {
             if (tab === 'adminManage') renderAdminManage();
             else if (tab === 'adminAdd') renderAdminAdd();
-            else if (tab === 'adminUsers') renderAdminUsers();
-            else if (tab === 'adminPromo') renderAdminPromo();
-            else if (tab === 'adminNotifications') renderAdminNotifications();
-            else if (tab === 'adminExport') renderAdminExport();
+            else if (tab === 'adminUsers' && user.role === 'admin') renderAdminUsers();
+            else if (tab === 'adminPromo' && user.role === 'admin') renderAdminPromo();
+            else if (tab === 'adminNotifications' && user.role === 'admin') renderAdminNotifications();
+            else if (tab === 'adminExport' && user.role === 'admin') renderAdminExport();
         } else {
             if (tab === 'matches') renderMatches();
             else if (tab === 'express') renderExpress();
@@ -340,7 +365,7 @@
         }
     }
 
-    // ---------- ПОЛЬЗОВАТЕЛЬСКИЕ ВКЛАДКИ ----------
+    // ========== ПОЛЬЗОВАТЕЛЬСКИЕ ВКЛАДКИ ==========
     // Экспресс
     let expressState = { step:'divisions', sel:[], div:null, outcomes:{}, totalOdds:0 };
     function renderExpress() {
@@ -603,7 +628,7 @@
         els.tab.innerHTML = html;
     }
 
-    // ---------- АДМИНКА ----------
+    // ========== АДМИНКА ==========
     function renderAdminManage() {
         let html = '<div class="section-title">Управление матчами</div>';
         html += `<div style="margin-bottom:10px;">
@@ -976,7 +1001,7 @@
     }
 
     function checkPendingBets() {
-        const user = getCurrentUser(); if (!user || user.role === 'admin') return;
+        const user = getCurrentUser(); if (!user || user.role === 'admin' || user.role === 'match_manager') return;
         const resolved = [];
         (user.bets || []).forEach(bet => {
             if (bet.status !== 'pending') return;
