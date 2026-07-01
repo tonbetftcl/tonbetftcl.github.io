@@ -144,6 +144,7 @@
     <div class="nav-item active" data-tab="adminManage">Матчи</div>
     <div class="nav-item" data-tab="adminAdd">Добавить</div>
     <div class="nav-item" data-tab="adminUsers">Пользователи</div>
+    <div class="nav-item" data-tab="adminClubs">Клубы</div>
     <div class="nav-item" data-tab="adminPromo">Промокоды</div>
     <div class="nav-item" data-tab="adminNotifications">Уведомления</div>
     <div class="nav-item" data-tab="adminExport">Экспорт</div>
@@ -288,6 +289,7 @@
             if (tab === 'adminManage') renderAdminManage();
             else if (tab === 'adminAdd') renderAdminAdd();
             else if (tab === 'adminUsers' && user.role === 'admin') renderAdminUsers();
+            else if (tab === 'adminClubs' && user.role === 'admin') renderAdminClubs();
             else if (tab === 'adminPromo' && user.role === 'admin') renderAdminPromo();
             else if (tab === 'adminNotifications' && user.role === 'admin') renderAdminNotifications();
             else if (tab === 'adminExport' && user.role === 'admin') renderAdminExport();
@@ -733,6 +735,101 @@
         els.tab.innerHTML = html;
         els.tab.querySelectorAll('.setBalance').forEach(b => b.onclick = async () => { const user = users.find(u => u.username === b.dataset.uid); const input = els.tab.querySelector(`.newBalance[data-uid="${b.dataset.uid}"]`); const val = +input.value; if (isNaN(val)) return alert('Введите число'); user.balance = val; await saveUsers(); renderTab('adminUsers'); });
         els.tab.querySelectorAll('.toggleBan').forEach(b => b.onclick = async () => { const user = users.find(u => u.username === b.dataset.uid); user.banned = !user.banned; await saveUsers(); renderTab('adminUsers'); });
+    }
+
+    function renderAdminClubs() {
+        const clubSet = new Set();
+        matches.forEach(m => { if (m.team1) clubSet.add(m.team1.trim()); if (m.team2) clubSet.add(m.team2.trim()); });
+        const clubs = Array.from(clubSet).sort();
+        let html = '<div class="section-title">Управление клубами</div>';
+        if (clubs.length === 0) html += '<p style="color:#aaa;">Нет добавленных клубов</p>';
+        else clubs.forEach(club => {
+            html += `<div style="background:var(--card-bg);border-radius:14px;padding:12px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
+                <strong>${club}</strong>
+                <div>
+                    <button class="action-btn renameClub" data-club="${club}" style="margin-right:5px;">Переименовать</button>
+                    <button class="action-btn mergeClub" data-club="${club}">Объединить</button>
+                    <button class="action-btn deleteClub" data-club="${club}" style="margin-left:5px;">Удалить</button>
+                </div>
+            </div>`;
+        });
+        els.tab.innerHTML = html;
+
+        els.tab.querySelectorAll('.renameClub').forEach(btn => {
+            btn.onclick = () => {
+                const oldName = btn.dataset.club;
+                const newName = prompt('Введите новое название клуба:', oldName);
+                if (!newName || newName.trim() === oldName.trim()) return;
+                const newNameTrimmed = newName.trim();
+                matches.forEach(m => {
+                    if (m.team1 && m.team1.trim() === oldName) m.team1 = newNameTrimmed;
+                    if (m.team2 && m.team2.trim() === oldName) m.team2 = newNameTrimmed;
+                });
+                users.forEach(u => (u.bets || []).forEach(bet => {
+                    if (bet.type === 'single') {
+                        if (bet.team1 && bet.team1.trim() === oldName) bet.team1 = newNameTrimmed;
+                        if (bet.team2 && bet.team2.trim() === oldName) bet.team2 = newNameTrimmed;
+                    } else if (bet.type === 'express' && bet.legs) {
+                        bet.legs.forEach(leg => {
+                            if (leg.team1 && leg.team1.trim() === oldName) leg.team1 = newNameTrimmed;
+                            if (leg.team2 && leg.team2.trim() === oldName) leg.team2 = newNameTrimmed;
+                        });
+                    }
+                }));
+                saveMatches().then(() => saveUsers()).then(() => renderTab('adminClubs'));
+            };
+        });
+
+        els.tab.querySelectorAll('.mergeClub').forEach(btn => {
+            btn.onclick = () => {
+                const sourceClub = btn.dataset.club;
+                const targetClub = prompt(`Введите название клуба, с которым объединить "${sourceClub}":`);
+                if (!targetClub || targetClub.trim() === sourceClub.trim() || !clubs.includes(targetClub.trim())) {
+                    alert('Некорректное название или такой клуб не найден');
+                    return;
+                }
+                const target = targetClub.trim();
+                matches.forEach(m => {
+                    if (m.team1 && m.team1.trim() === sourceClub) m.team1 = target;
+                    if (m.team2 && m.team2.trim() === sourceClub) m.team2 = target;
+                });
+                users.forEach(u => (u.bets || []).forEach(bet => {
+                    if (bet.type === 'single') {
+                        if (bet.team1 && bet.team1.trim() === sourceClub) bet.team1 = target;
+                        if (bet.team2 && bet.team2.trim() === sourceClub) bet.team2 = target;
+                    } else if (bet.type === 'express' && bet.legs) {
+                        bet.legs.forEach(leg => {
+                            if (leg.team1 && leg.team1.trim() === sourceClub) leg.team1 = target;
+                            if (leg.team2 && leg.team2.trim() === sourceClub) leg.team2 = target;
+                        });
+                    }
+                }));
+                saveMatches().then(() => saveUsers()).then(() => renderTab('adminClubs'));
+            };
+        });
+
+        els.tab.querySelectorAll('.deleteClub').forEach(btn => {
+            btn.onclick = () => {
+                const club = btn.dataset.club;
+                if (!confirm(`Удалить клуб "${club}"? Во всех матчах и ставках название будет заменено на "???".`)) return;
+                matches.forEach(m => {
+                    if (m.team1 && m.team1.trim() === club) m.team1 = '???';
+                    if (m.team2 && m.team2.trim() === club) m.team2 = '???';
+                });
+                users.forEach(u => (u.bets || []).forEach(bet => {
+                    if (bet.type === 'single') {
+                        if (bet.team1 && bet.team1.trim() === club) bet.team1 = '???';
+                        if (bet.team2 && bet.team2.trim() === club) bet.team2 = '???';
+                    } else if (bet.type === 'express' && bet.legs) {
+                        bet.legs.forEach(leg => {
+                            if (leg.team1 && leg.team1.trim() === club) leg.team1 = '???';
+                            if (leg.team2 && leg.team2.trim() === club) leg.team2 = '???';
+                        });
+                    }
+                }));
+                saveMatches().then(() => saveUsers()).then(() => renderTab('adminClubs'));
+            };
+        });
     }
 
     function renderAdminPromo() {
